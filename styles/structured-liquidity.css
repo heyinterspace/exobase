@@ -1,0 +1,223 @@
+/* ============================================================
+   STRUCTURED LIQUIDITY — a design language built on three
+   pillars: Rigid Containment (sharp 90° corners, flat blurless
+   shadows, grid discipline), Viscous Depth (semi-transparent
+   liquid glass that reflects light), and Semantic Clarity
+   (strict text + icon pairings). This stylesheet IS the specimen.
+   ============================================================ */
+
+:root {
+  /* ---- tunable knobs (driven by Tweaks) ---- */
+  --accent: #a388ee;          /* neobrutalism.dev purple */
+  --accent-ink: #000000;      /* text that sits on accent */
+  --glass-blur: 18px;
+  --glass-tint: 255 255 255;  /* rgb channels for glass fill */
+  --glass-alpha: 0.07;
+  --border-w: 2px;
+  --hard-x: 7px;
+  --hard-y: 7px;
+  --radius: 0px;
+
+  /* ---- fixed palette (neobrutalism.dev) ---- */
+  --bg: #272933;
+  --bg-2: #1f2028;
+  --ink: #e6e6e6;             /* foreground */
+  --ink-dim: #9da0ab;
+  --edge: 0 0 0;              /* neobrutalism black border (rgb) */
+  --hard-shadow: #000000;
+  --neg: #3c3f4b;             /* negative / destructive surface (gray, never red) */
+  --neg-ink: #f0f0f2;
+
+  --mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
+  --display: "Archivo", "Helvetica Neue", system-ui, sans-serif;
+}
+
+/* tighter rhythm — denser, less airy */
+
+[data-mode="light"] {
+  --bg: #dfe5f2;
+  --bg-2: #ffffff;
+  --ink: #000000;
+  --ink-dim: #5b5f6b;
+  --edge: 0 0 0;
+  --hard-shadow: #000000;
+  --neg: #16171c;             /* near-black negative surface in light mode */
+  --neg-ink: #ffffff;
+  --glass-tint: 255 255 255;
+  --glass-alpha: 0.55;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; background: var(--bg); }
+
+body {
+  margin: 0;
+  position: relative;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 440;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+/* ============================================================
+   BACKDROP — a full-document-height iridescent field the glass
+   refracts. Not fixed (fixed/attachment:fixed only paint at the
+   document top in capture/print contexts) — it spans the whole
+   page so every section is tinted and nothing renders flat-black.
+   ============================================================ */
+
+.field {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(52vw 32vh at 12% 2%,  rgba(124, 60, 255, 0.50), transparent 70%),
+    radial-gradient(46vw 30vh at 90% 10%, rgba(176, 60, 255, 0.42), transparent 70%),
+    radial-gradient(52vw 30vh at 78% 30%, rgba(214, 70, 255, 0.30), transparent 72%),
+    radial-gradient(46vw 28vh at 16% 45%, rgba(91, 60, 255, 0.38), transparent 72%),
+    radial-gradient(50vw 28vh at 84% 60%, rgba(124, 60, 255, 0.34), transparent 72%),
+    radial-gradient(46vw 26vh at 22% 74%, rgba(176, 60, 255, 0.30), transparent 72%),
+    radial-gradient(52vw 30vh at 80% 90%, rgba(214, 70, 255, 0.26), transparent 72%),
+    radial-gradient(46vw 26vh at 18% 98%, rgba(91, 60, 255, 0.34), transparent 72%);
+  background-repeat: no-repeat;
+  animation: fieldshift 30s ease-in-out infinite alternate;
+}
+[data-mode="light"] .field { opacity: 0.55; }
+@keyframes fieldshift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-3vw); }
+}
+@media (prefers-reduced-motion: reduce) { .field { animation: none; } }
+
+.field .grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(var(--edge), 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--edge), 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, #000, #000 40%, rgba(0,0,0,0.25) 75%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000, #000 40%, rgba(0,0,0,0.25) 75%, transparent);
+}
+
+.grain {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   GLASS-BRUTAL PRIMITIVE — frosted material + brutal edge
+   ============================================================ */
+
+.glass {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(var(--glass-tint), calc(var(--glass-alpha) + 0.06)), rgba(var(--glass-tint), var(--glass-alpha)));
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: var(--border-w) solid rgb(var(--edge));
+  border-radius: var(--radius);
+  box-shadow:
+    var(--hard-x) var(--hard-y) 0 0 var(--hard-shadow),         /* the brutal hard shadow */
+    inset 0 1px 0 rgba(255,255,255,0.45),                        /* top specular */
+    inset 0 -1px 0 rgba(255,255,255,0.06),
+    inset 0 0 40px rgba(255,255,255,0.04);
+}
+/* moving sheen + cursor specular */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    180px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255,255,255,0.22), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.glass:hover::before { opacity: 1; }
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.10) 45%, transparent 55%);
+  background-size: 250% 250%;
+  background-position: 100% 100%;
+  opacity: 0.7;
+}
+
+.flat {            /* brutalist flat (no glass) — for loud accent blocks */
+  border: var(--border-w) solid rgb(var(--edge));
+  border-radius: var(--radius);
+  box-shadow: var(--hard-x) var(--hard-y) 0 0 var(--hard-shadow);
+}
+
+/* ============================================================
+   TYPE
+   ============================================================ */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.eyebrow::before {
+  content: "";
+  width: 9px; height: 9px;
+  background: var(--accent);
+  display: inline-block;
+}
+
+h1, h2, h3 { font-weight: 800; line-height: 0.98; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+
+.section-title {
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+  margin: 0.25em 0 0.3em;
+}
+.lead { font-size: clamp(1rem, 1.3vw, 1.18rem); color: var(--ink-dim); max-width: 60ch; text-wrap: pretty; }
+
+.accent { color: var(--accent); }
+.mono { font-family: var(--mono); }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+
+.wrap { width: min(1200px, 92vw); margin: 0 auto; }
+section { padding: clamp(1.5rem, 3.4vh, 2.7rem) 0; position: relative; }
+.section-head { max-width: 70ch; margin-bottom: 1.1rem; }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+@media print {
+  .reveal { opacity: 1 !important; transform: none !important; }
+}

@@ -70,6 +70,64 @@ h6 {
   font-family: var(--sl-font-display);
 }
 
+/*
+ * These used to be UnoCSS `shortcuts` (uno.config.ts), which only UnoCSS's
+ * presetUno understood. Now that Tailwind is the utility engine and UnoCSS
+ * is scoped to icons only, they're plain CSS classes instead so the handful
+ * of components referencing them by name keep working unchanged.
+ */
+.bolt-ease-cubic-bezier {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-theme {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kdb {
+  background-color: var(--bolt-elements-code-background);
+  color: var(--bolt-elements-code-text);
+  padding: 0.25rem 0.375rem;
+  border-radius: var(--sl-radius);
+}
+
+.max-w-chat {
+  max-width: var(--chat-max-width);
+}
+
+.shadow-hard {
+  box-shadow: var(--sl-hard-x) var(--sl-hard-y) 0 0 var(--sl-hard);
+}
+
+.shadow-hard-lg {
+  box-shadow: var(--sl-hard-x-lg) var(--sl-hard-y-lg) 0 0 var(--sl-hard);
+}
+
+.press-hard {
+  transition-property: transform, box-shadow;
+
+  &:active {
+    transform: translate(var(--sl-hard-x), var(--sl-hard-y));
+    box-shadow: none;
+  }
+}
+
+.press-hard-lg {
+  transition-property: transform, box-shadow;
+
+  &:active {
+    transform: translate(var(--sl-hard-x-lg), var(--sl-hard-y-lg));
+    box-shadow: none;
+  }
+}
+
+.glass {
+  backdrop-filter: blur(var(--sl-glass-blur));
+  background-color: rgba(255, 255, 255, var(--sl-glass-alpha, 0.07));
+}
+
 :root {
   --gradient-opacity: 0.8;
   --primary-color: rgba(158, 117, 240, var(--gradient-opacity));

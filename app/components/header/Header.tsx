@@ -7,7 +7,6 @@ import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
 import { SettingsButton } from '~/components/ui/SettingsButton';
-import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -33,7 +32,6 @@ export function Header() {
       )}
       <div className={classNames('flex items-center gap-2', { 'ml-auto': !chat.started })}>
         {chat.started && <ClientOnly>{() => <HeaderActionButtons chatStarted={chat.started} />}</ClientOnly>}
-        <ThemeSwitch />
         <SettingsButton onClick={() => setIsSettingsOpen(true)} />
       </div>
       <ClientOnly>{() => <ControlPanel open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />}</ClientOnly>
