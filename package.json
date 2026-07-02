@@ -1,14 +1,14 @@
 {
-  "name": "bolt",
-  "description": "An AI Agent",
+  "name": "exobase",
+  "description": "Exobase — a BYO-model AI app builder, forked from bolt.diy",
   "private": true,
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "author": {
-    "name": "bolt.diy team",
-    "email": "maintainers@bolt.diy"
+    "name": "Interspace Ventures",
+    "email": "hey@samir.xyz"
   },
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
