@@ -16,11 +16,11 @@ body {
 }
 
 /*
- * Structured Liquidity pass: sharp 90° corners and flat, hard-edged offset
- * shadows everywhere, per https://structured.glass. Scoped to the rounded-*
- * and shadow-* utility classes rather than a blanket `*` selector so that
- * intentionally-circular elements (avatars, spinners, switch thumbs, which
- * use rounded-full) are left alone.
+ * Structured Liquidity pass: sharp 90° corners everywhere, no exceptions —
+ * including rounded-full, so chips/badges/avatars don't read as pill shapes.
+ * Scoped to the rounded-* utility classes rather than a blanket `*` selector
+ * only so non-utility corner-rounding (e.g. the OS-convention scrollbar
+ * thumb below) isn't touched.
  */
 .rounded,
 .rounded-sm,
@@ -29,6 +29,7 @@ body {
 .rounded-xl,
 .rounded-2xl,
 .rounded-3xl,
+.rounded-full,
 .rounded-t,
 .rounded-b,
 .rounded-l,

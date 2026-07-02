@@ -487,7 +487,7 @@ export const ModelSelector = ({
 
         {isModelDropdownOpen && (
           <div
-            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 shadow-lg"
+            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
             role="listbox"
             id="model-listbox"
           >
@@ -773,7 +773,7 @@ export const ModelSelector = ({
 
               {isProviderDropdownOpen && (
                 <div
-                  className="absolute z-20 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 shadow-lg"
+                  className="absolute z-20 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
                   role="listbox"
                   id="provider-listbox"
                 >
