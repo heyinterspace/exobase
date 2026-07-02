@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { chatStore } from '~/lib/stores/chat';
 import { classNames } from '~/utils/classNames';
 import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
+import { ControlPanel } from '~/components/@settings/core/ControlPanel';
+import { SettingsButton } from '~/components/ui/SettingsButton';
+import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 
 export function Header() {
   const chat = useStore(chatStore);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <header
@@ -21,20 +26,17 @@ export function Header() {
           Exobase
         </a>
       </div>
-      {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
-        <>
-          <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
-            <ClientOnly>{() => <ChatDescription />}</ClientOnly>
-          </span>
-          <ClientOnly>
-            {() => (
-              <div className="">
-                <HeaderActionButtons chatStarted={chat.started} />
-              </div>
-            )}
-          </ClientOnly>
-        </>
+      {chat.started && ( // Display ChatDescription only when the chat has started.
+        <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
+          <ClientOnly>{() => <ChatDescription />}</ClientOnly>
+        </span>
       )}
+      <div className={classNames('flex items-center gap-2', { 'ml-auto': !chat.started })}>
+        {chat.started && <ClientOnly>{() => <HeaderActionButtons chatStarted={chat.started} />}</ClientOnly>}
+        <ThemeSwitch />
+        <SettingsButton onClick={() => setIsSettingsOpen(true)} />
+      </div>
+      <ClientOnly>{() => <ControlPanel open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />}</ClientOnly>
     </header>
   );
 }
