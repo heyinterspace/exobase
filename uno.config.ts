@@ -34,18 +34,19 @@ const BASE_COLORS = {
     900: '#171717',
     950: '#0A0A0A',
   },
+  // Anchored on Structured Liquidity's single accent, #A388EE (https://structured.glass)
   accent: {
-    50: '#F8F5FF',
-    100: '#F0EBFF',
-    200: '#E1D6FF',
-    300: '#CEBEFF',
-    400: '#B69EFF',
-    500: '#9C7DFF',
-    600: '#8A5FFF',
-    700: '#7645E8',
-    800: '#6234BB',
-    900: '#502D93',
-    950: '#2D1959',
+    50: '#F6F3FD',
+    100: '#E8E1FB',
+    200: '#D5C9F7',
+    300: '#C3B2F4',
+    400: '#B199F1',
+    500: '#A388EE',
+    600: '#8B74CB',
+    700: '#725FA7',
+    800: '#5A4B83',
+    900: '#41365F',
+    950: '#29223C',
   },
   green: {
     50: '#F0FDF4',
@@ -104,6 +105,14 @@ export default defineConfig({
     'transition-theme': 'transition-[background-color,border-color,color] duration-150 bolt-ease-cubic-bezier',
     kdb: 'bg-bolt-elements-code-background text-bolt-elements-code-text py-1 px-1.5 rounded-md',
     'max-w-chat': 'max-w-[var(--chat-max-width)]',
+
+    // Structured Liquidity (structured.glass): flat, hard-edged offset shadow that
+    // a surface "settles into" on press — no blur, ever.
+    'shadow-hard': 'shadow-[4px_4px_0_0_var(--sl-hard)]',
+    'shadow-hard-lg': 'shadow-[7px_7px_0_0_var(--sl-hard)]',
+    'press-hard': 'transition-[transform,box-shadow] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none',
+    'press-hard-lg': 'transition-[transform,box-shadow] active:translate-x-[7px] active:translate-y-[7px] active:shadow-none',
+    glass: 'backdrop-blur-[var(--sl-glass-blur)] bg-white/[.07] dark:bg-white/[.07]',
   },
   rules: [
     /**
@@ -113,6 +122,11 @@ export default defineConfig({
     ['b', {}],
   ],
   theme: {
+    fontFamily: {
+      display: 'var(--sl-font-display)',
+      body: 'var(--sl-font-body)',
+      mono: 'var(--sl-font-mono)',
+    },
     colors: {
       ...COLOR_PRIMITIVES,
       bolt: {

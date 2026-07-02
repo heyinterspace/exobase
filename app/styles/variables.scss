@@ -1,7 +1,32 @@
+/* Structured Liquidity design tokens — https://structured.glass */
+:root {
+  --sl-accent: #a388ee;
+  --sl-accent-ink: #000000;
+  --sl-radius: 0px;
+  --sl-border-w: 2px;
+  --sl-hard-x: 4px;
+  --sl-hard-y: 4px;
+  --sl-hard-x-lg: 7px;
+  --sl-hard-y-lg: 7px;
+  --sl-glass-blur: 18px;
+  --sl-glass-alpha: 0.07;
+  --sl-font-display: 'Archivo', 'Helvetica Neue', system-ui, sans-serif;
+  --sl-font-body: 'Outfit', 'Helvetica Neue', system-ui, sans-serif;
+  --sl-font-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+:root,
+:root[data-theme='light'] {
+  /* Edge/shadow color that "structural" surfaces are drawn against — solid black reads
+     on bolt's light backgrounds. Dark theme below flips this to a light tone since bolt's
+     dark backgrounds are near-black, where a black edge/shadow would be invisible. */
+  --sl-hard: #000000;
+}
+
 /* Color Tokens Light Theme */
 :root,
 :root[data-theme='light'] {
-  --bolt-elements-borderColor: theme('colors.alpha.gray.10');
+  --bolt-elements-borderColor: var(--sl-hard);
   --bolt-elements-borderColorActive: theme('colors.accent.600');
 
   --bolt-elements-bg-depth-1: theme('colors.white');
@@ -106,10 +131,14 @@
   --modern-scrollbar-thumb-backgroundHover: rgba(74, 74, 74, 0.8);
 }
 
+:root[data-theme='dark'] {
+  --sl-hard: #d4d4d4;
+}
+
 /* Color Tokens Dark Theme */
 :root,
 :root[data-theme='dark'] {
-  --bolt-elements-borderColor: theme('colors.alpha.white.10');
+  --bolt-elements-borderColor: var(--sl-hard);
   --bolt-elements-borderColorActive: theme('colors.accent.500');
 
   --bolt-elements-bg-depth-1: theme('colors.gray.950');

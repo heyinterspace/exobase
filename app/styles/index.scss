@@ -12,6 +12,61 @@ body {
   height: 100%;
   width: 100%;
   background-color: var(--bolt-elements-bg-depth-1);
+  font-family: var(--sl-font-body);
+}
+
+/*
+ * Structured Liquidity pass: sharp 90° corners and flat, hard-edged offset
+ * shadows everywhere, per https://structured.glass. Scoped to the rounded-*
+ * and shadow-* utility classes rather than a blanket `*` selector so that
+ * intentionally-circular elements (avatars, spinners, switch thumbs, which
+ * use rounded-full) are left alone.
+ */
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+.rounded-t,
+.rounded-b,
+.rounded-l,
+.rounded-r,
+.rounded-tl,
+.rounded-tr,
+.rounded-bl,
+.rounded-br {
+  border-radius: var(--sl-radius) !important;
+}
+
+.shadow,
+.shadow-sm,
+.shadow-md {
+  box-shadow: var(--sl-hard-x) var(--sl-hard-y) 0 0 var(--sl-hard) !important;
+}
+
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: var(--sl-hard-x-lg) var(--sl-hard-y-lg) 0 0 var(--sl-hard) !important;
+}
+
+.border,
+.border-t,
+.border-b,
+.border-l,
+.border-r {
+  border-width: var(--sl-border-w) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--sl-font-display);
 }
 
 :root {
