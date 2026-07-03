@@ -226,13 +226,6 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             })}
           </div>
         )}
-
-        {props.input.length > 3 && (
-          <div className="px-4 pb-3 text-xs text-bolt-elements-textTertiary">
-            Use <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-3">Shift</kbd> +{' '}
-            <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-3">Return</kbd> for a new line
-          </div>
-        )}
       </div>
 
       <div className="flex justify-between items-center text-sm pt-2 gap-2">
