@@ -25,8 +25,8 @@
   --bg-2: #171717;
   --ink: #ffffff;
   --ink-dim: #a3a3a3;
-  --edge: 212 212 212;
-  --hard-shadow: #d4d4d4;
+  --edge: 60 63 75;
+  --hard-shadow: #3c3f4b;
   --neg: #262626;
   --neg-ink: #f0f0f2;
   --glass-blur: 18px;
@@ -112,8 +112,8 @@
      silently wins — and it doesn't match "one accent carries all emphasis". */
   --accent-foreground: #000000;
   --destructive: #ef4444; /* red.500 */
-  --border: #d4d4d4; /* = --bolt-elements-borderColor in dark mode */
-  --input: #d4d4d4;
+  --border: #3c3f4b; /* = --bolt-elements-borderColor in dark mode */
+  --input: #3c3f4b;
   --ring: #a388ee;
   --chart-1: #a388ee;
   --chart-2: #8b74cb;
@@ -127,7 +127,7 @@
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #262626;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #d4d4d4;
+  --sidebar-border: #3c3f4b;
   --sidebar-ring: #a388ee;
 }
 

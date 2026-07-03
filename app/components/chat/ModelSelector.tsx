@@ -449,14 +449,207 @@ export const ModelSelector = ({
     );
   }
 
+  const providerPickerBody = (
+    <div className="relative flex w-full">
+      <div
+        className={classNames(
+          'w-full p-2 rounded-lg border border-bolt-elements-borderColor shadow-hard',
+          'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
+          'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
+          'transition-all cursor-pointer',
+          isProviderDropdownOpen ? 'ring-2 ring-bolt-elements-focus' : undefined,
+        )}
+        onClick={() => setIsProviderDropdownOpen(!isProviderDropdownOpen)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsProviderDropdownOpen(!isProviderDropdownOpen);
+          }
+        }}
+        role="combobox"
+        aria-expanded={isProviderDropdownOpen}
+        aria-controls="provider-listbox"
+        aria-haspopup="listbox"
+        tabIndex={0}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 truncate">
+            {provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
+              <span
+                className={classNames(
+                  'inline-block w-2 h-2 rounded-full flex-shrink-0',
+                  localProviderStatus[provider.name] === 'connected'
+                    ? 'bg-green-500'
+                    : localProviderStatus[provider.name] === 'disconnected'
+                      ? 'bg-red-400'
+                      : 'bg-bolt-elements-textTertiary',
+                )}
+                title={
+                  localProviderStatus[provider.name] === 'connected'
+                    ? `${provider.name} is running`
+                    : localProviderStatus[provider.name] === 'disconnected'
+                      ? `${provider.name} is not reachable`
+                      : 'Checking...'
+                }
+              />
+            )}
+            {provider?.name || 'Select provider'}
+          </div>
+          <div
+            className={classNames(
+              'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',
+              isProviderDropdownOpen ? 'rotate-180' : undefined,
+            )}
+          />
+        </div>
+      </div>
+
+      {isProviderDropdownOpen && (
+        <div
+          className="absolute z-20 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
+          role="listbox"
+          id="provider-listbox"
+        >
+          <div className="px-2 pb-2">
+            <div className="relative">
+              <input
+                ref={providerSearchInputRef}
+                type="text"
+                value={providerSearchQuery}
+                onChange={(e) => setProviderSearchQuery(e.target.value)}
+                placeholder="Search providers... (⌘K to clear)"
+                className={classNames(
+                  'w-full pl-8 pr-8 py-1.5 rounded-md text-sm',
+                  'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
+                  'text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary',
+                  'focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus',
+                  'transition-all',
+                )}
+                onClick={(e) => e.stopPropagation()}
+                role="searchbox"
+                aria-label="Search providers"
+              />
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
+                <span className="i-ph:magnifying-glass text-bolt-elements-textTertiary" />
+              </div>
+              {providerSearchQuery && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearProviderSearch();
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-bolt-elements-background-depth-3 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <span className="i-ph:x text-bolt-elements-textTertiary text-xs" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div
+            className={classNames(
+              'max-h-60 overflow-y-auto',
+              'sm:scrollbar-none',
+              '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2',
+              '[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor',
+              '[&::-webkit-scrollbar-thumb]:hover:bg-bolt-elements-borderColorHover',
+              '[&::-webkit-scrollbar-thumb]:rounded-full',
+              '[&::-webkit-scrollbar-track]:bg-bolt-elements-background-depth-2',
+              '[&::-webkit-scrollbar-track]:rounded-full',
+              'sm:[&::-webkit-scrollbar]:w-1.5 sm:[&::-webkit-scrollbar]:h-1.5',
+              'sm:hover:[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor/50',
+              'sm:hover:[&::-webkit-scrollbar-thumb:hover]:bg-bolt-elements-borderColor',
+              'sm:[&::-webkit-scrollbar-track]:bg-transparent',
+            )}
+          >
+            {filteredProviders.length === 0 ? (
+              <div className="px-3 py-3 text-sm">
+                <div className="text-bolt-elements-textTertiary mb-1">
+                  {debouncedProviderSearchQuery
+                    ? `No providers match "${debouncedProviderSearchQuery}"`
+                    : 'No providers found'}
+                </div>
+                {debouncedProviderSearchQuery && (
+                  <div className="text-xs text-bolt-elements-textTertiary">
+                    Try searching for provider names like "OpenAI", "Anthropic", or "Google"
+                  </div>
+                )}
+              </div>
+            ) : (
+              filteredProviders.map((providerOption, index) => (
+                <div
+                  ref={(el) => (providerOptionsRef.current[index] = el)}
+                  key={providerOption.name}
+                  role="option"
+                  aria-selected={provider?.name === providerOption.name}
+                  className={classNames(
+                    'px-3 py-2 text-sm cursor-pointer',
+                    'hover:bg-bolt-elements-background-depth-3',
+                    'text-bolt-elements-textPrimary',
+                    'outline-none',
+                    provider?.name === providerOption.name || focusedProviderIndex === index
+                      ? 'bg-bolt-elements-background-depth-2'
+                      : undefined,
+                    focusedProviderIndex === index ? 'ring-1 ring-inset ring-bolt-elements-focus' : undefined,
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    if (setProvider) {
+                      setProvider(providerOption);
+
+                      const firstModel = modelList.find((m) => m.provider === providerOption.name);
+
+                      if (firstModel && setModel) {
+                        setModel(firstModel.name);
+                      }
+                    }
+
+                    setIsProviderDropdownOpen(false);
+                    setProviderSearchQuery('');
+                    setDebouncedProviderSearchQuery('');
+                    setIsProviderPickerExpanded(false);
+                  }}
+                  tabIndex={focusedProviderIndex === index ? 0 : -1}
+                >
+                  <div className="flex items-center gap-2">
+                    {LOCAL_PROVIDERS.includes(providerOption.name) && (
+                      <span
+                        className={classNames(
+                          'inline-block w-2 h-2 rounded-full flex-shrink-0',
+                          localProviderStatus[providerOption.name] === 'connected'
+                            ? 'bg-green-500'
+                            : localProviderStatus[providerOption.name] === 'disconnected'
+                              ? 'bg-red-400'
+                              : 'bg-bolt-elements-textTertiary',
+                        )}
+                      />
+                    )}
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: (providerOption as any).highlightedName || providerOption.name,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div className="flex flex-col gap-1.5">
-      {/* Model Combobox — the one control shown by default, Replit-style */}
-      <div className="relative flex w-full" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
+    <div className="inline-block relative">
+      {/* Model Combobox — compact chip, bottom-left of the composer */}
+      <div className="relative inline-flex" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
         <div
           className={classNames(
-            'w-full p-2 rounded-lg border border-bolt-elements-borderColor shadow-hard',
-            'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
+            'max-w-[180px] px-2.5 py-1.5 border border-bolt-elements-borderColor shadow-hard',
+            'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary text-xs',
             'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
             'transition-all cursor-pointer',
             isModelDropdownOpen ? 'ring-2 ring-bolt-elements-focus' : undefined,
@@ -474,11 +667,11 @@ export const ModelSelector = ({
           aria-haspopup="listbox"
           tabIndex={0}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <div className="truncate">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
             <div
               className={classNames(
-                'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',
+                'i-ph:caret-down w-3 h-3 text-bolt-elements-textSecondary opacity-75 shrink-0',
                 isModelDropdownOpen ? 'rotate-180' : undefined,
               )}
             />
@@ -487,11 +680,61 @@ export const ModelSelector = ({
 
         {isModelDropdownOpen && (
           <div
-            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
+            className="absolute z-10 w-80 bottom-full left-0 mb-1 py-1 border border-bolt-elements-borderColor glass shadow-hard-lg"
             role="listbox"
             id="model-listbox"
           >
             <div className="px-2 pb-2 space-y-2">
+              {/* Provider — which BYO key/endpoint this model list comes from */}
+              <div
+                className="relative flex border-b border-bolt-elements-borderColor pb-2"
+                onKeyDown={handleProviderKeyDown}
+                ref={providerDropdownRef}
+              >
+                {!isProviderPickerExpanded ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProviderPickerExpanded(true);
+                    }}
+                    className="flex items-center gap-1.5 text-xs text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary transition-colors"
+                  >
+                    {provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
+                      <span
+                        className={classNames(
+                          'inline-block w-1.5 h-1.5 rounded-full flex-shrink-0',
+                          localProviderStatus[provider.name] === 'connected'
+                            ? 'bg-green-500'
+                            : localProviderStatus[provider.name] === 'disconnected'
+                              ? 'bg-red-400'
+                              : 'bg-bolt-elements-textTertiary',
+                        )}
+                      />
+                    )}
+                    <span>via {provider?.name || 'provider'}</span>
+                    <span className="i-ph:caret-down text-[10px]" />
+                  </button>
+                ) : (
+                  <div className="flex w-full flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-bolt-elements-textTertiary">Provider (BYO model/key)</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsProviderPickerExpanded(false);
+                        }}
+                        className="text-xs text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary flex items-center gap-1"
+                      >
+                        Hide <span className="i-ph:caret-up text-[10px]" />
+                      </button>
+                    </div>
+                    {providerPickerBody}
+                  </div>
+                )}
+              </div>
+
               {/* Free Models Filter Toggle - Only show for OpenRouter */}
               {provider?.name === 'OpenRouter' && (
                 <div className="flex items-center gap-2">
@@ -675,236 +918,6 @@ export const ModelSelector = ({
                     </div>
                   </div>
                 ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Provider — collapsed by default; expand to switch which BYO key/endpoint a model comes from */}
-      <div className="relative flex" onKeyDown={handleProviderKeyDown} ref={providerDropdownRef}>
-        {!isProviderPickerExpanded ? (
-          <button
-            type="button"
-            onClick={() => setIsProviderPickerExpanded(true)}
-            className="flex items-center gap-1.5 text-xs text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary transition-colors"
-          >
-            {provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
-              <span
-                className={classNames(
-                  'inline-block w-1.5 h-1.5 rounded-full flex-shrink-0',
-                  localProviderStatus[provider.name] === 'connected'
-                    ? 'bg-green-500'
-                    : localProviderStatus[provider.name] === 'disconnected'
-                      ? 'bg-red-400'
-                      : 'bg-bolt-elements-textTertiary',
-                )}
-              />
-            )}
-            <span>via {provider?.name || 'provider'}</span>
-            <span className="i-ph:caret-down text-[10px]" />
-          </button>
-        ) : (
-          <div className="flex w-full flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-bolt-elements-textTertiary">Provider (BYO model/key)</span>
-              <button
-                type="button"
-                onClick={() => setIsProviderPickerExpanded(false)}
-                className="text-xs text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary flex items-center gap-1"
-              >
-                Hide <span className="i-ph:caret-up text-[10px]" />
-              </button>
-            </div>
-
-            <div className="relative flex w-full">
-              <div
-                className={classNames(
-                  'w-full p-2 rounded-lg border border-bolt-elements-borderColor shadow-hard',
-                  'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
-                  'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
-                  'transition-all cursor-pointer',
-                  isProviderDropdownOpen ? 'ring-2 ring-bolt-elements-focus' : undefined,
-                )}
-                onClick={() => setIsProviderDropdownOpen(!isProviderDropdownOpen)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setIsProviderDropdownOpen(!isProviderDropdownOpen);
-                  }
-                }}
-                role="combobox"
-                aria-expanded={isProviderDropdownOpen}
-                aria-controls="provider-listbox"
-                aria-haspopup="listbox"
-                tabIndex={0}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 truncate">
-                    {provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
-                      <span
-                        className={classNames(
-                          'inline-block w-2 h-2 rounded-full flex-shrink-0',
-                          localProviderStatus[provider.name] === 'connected'
-                            ? 'bg-green-500'
-                            : localProviderStatus[provider.name] === 'disconnected'
-                              ? 'bg-red-400'
-                              : 'bg-bolt-elements-textTertiary',
-                        )}
-                        title={
-                          localProviderStatus[provider.name] === 'connected'
-                            ? `${provider.name} is running`
-                            : localProviderStatus[provider.name] === 'disconnected'
-                              ? `${provider.name} is not reachable`
-                              : 'Checking...'
-                        }
-                      />
-                    )}
-                    {provider?.name || 'Select provider'}
-                  </div>
-                  <div
-                    className={classNames(
-                      'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',
-                      isProviderDropdownOpen ? 'rotate-180' : undefined,
-                    )}
-                  />
-                </div>
-              </div>
-
-              {isProviderDropdownOpen && (
-                <div
-                  className="absolute z-20 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
-                  role="listbox"
-                  id="provider-listbox"
-                >
-                  <div className="px-2 pb-2">
-                    <div className="relative">
-                      <input
-                        ref={providerSearchInputRef}
-                        type="text"
-                        value={providerSearchQuery}
-                        onChange={(e) => setProviderSearchQuery(e.target.value)}
-                        placeholder="Search providers... (⌘K to clear)"
-                        className={classNames(
-                          'w-full pl-8 pr-8 py-1.5 rounded-md text-sm',
-                          'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
-                          'text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary',
-                          'focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus',
-                          'transition-all',
-                        )}
-                        onClick={(e) => e.stopPropagation()}
-                        role="searchbox"
-                        aria-label="Search providers"
-                      />
-                      <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
-                        <span className="i-ph:magnifying-glass text-bolt-elements-textTertiary" />
-                      </div>
-                      {providerSearchQuery && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearProviderSearch();
-                          }}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-bolt-elements-background-depth-3 transition-colors"
-                          aria-label="Clear search"
-                        >
-                          <span className="i-ph:x text-bolt-elements-textTertiary text-xs" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    className={classNames(
-                      'max-h-60 overflow-y-auto',
-                      'sm:scrollbar-none',
-                      '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2',
-                      '[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor',
-                      '[&::-webkit-scrollbar-thumb]:hover:bg-bolt-elements-borderColorHover',
-                      '[&::-webkit-scrollbar-thumb]:rounded-full',
-                      '[&::-webkit-scrollbar-track]:bg-bolt-elements-background-depth-2',
-                      '[&::-webkit-scrollbar-track]:rounded-full',
-                      'sm:[&::-webkit-scrollbar]:w-1.5 sm:[&::-webkit-scrollbar]:h-1.5',
-                      'sm:hover:[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor/50',
-                      'sm:hover:[&::-webkit-scrollbar-thumb:hover]:bg-bolt-elements-borderColor',
-                      'sm:[&::-webkit-scrollbar-track]:bg-transparent',
-                    )}
-                  >
-                    {filteredProviders.length === 0 ? (
-                      <div className="px-3 py-3 text-sm">
-                        <div className="text-bolt-elements-textTertiary mb-1">
-                          {debouncedProviderSearchQuery
-                            ? `No providers match "${debouncedProviderSearchQuery}"`
-                            : 'No providers found'}
-                        </div>
-                        {debouncedProviderSearchQuery && (
-                          <div className="text-xs text-bolt-elements-textTertiary">
-                            Try searching for provider names like "OpenAI", "Anthropic", or "Google"
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      filteredProviders.map((providerOption, index) => (
-                        <div
-                          ref={(el) => (providerOptionsRef.current[index] = el)}
-                          key={providerOption.name}
-                          role="option"
-                          aria-selected={provider?.name === providerOption.name}
-                          className={classNames(
-                            'px-3 py-2 text-sm cursor-pointer',
-                            'hover:bg-bolt-elements-background-depth-3',
-                            'text-bolt-elements-textPrimary',
-                            'outline-none',
-                            provider?.name === providerOption.name || focusedProviderIndex === index
-                              ? 'bg-bolt-elements-background-depth-2'
-                              : undefined,
-                            focusedProviderIndex === index ? 'ring-1 ring-inset ring-bolt-elements-focus' : undefined,
-                          )}
-                          onClick={(e) => {
-                            e.stopPropagation();
-
-                            if (setProvider) {
-                              setProvider(providerOption);
-
-                              const firstModel = modelList.find((m) => m.provider === providerOption.name);
-
-                              if (firstModel && setModel) {
-                                setModel(firstModel.name);
-                              }
-                            }
-
-                            setIsProviderDropdownOpen(false);
-                            setProviderSearchQuery('');
-                            setDebouncedProviderSearchQuery('');
-                            setIsProviderPickerExpanded(false);
-                          }}
-                          tabIndex={focusedProviderIndex === index ? 0 : -1}
-                        >
-                          <div className="flex items-center gap-2">
-                            {LOCAL_PROVIDERS.includes(providerOption.name) && (
-                              <span
-                                className={classNames(
-                                  'inline-block w-2 h-2 rounded-full flex-shrink-0',
-                                  localProviderStatus[providerOption.name] === 'connected'
-                                    ? 'bg-green-500'
-                                    : localProviderStatus[providerOption.name] === 'disconnected'
-                                      ? 'bg-red-400'
-                                      : 'bg-bolt-elements-textTertiary',
-                                )}
-                              />
-                            )}
-                            <span
-                              dangerouslySetInnerHTML={{
-                                __html: (providerOption as any).highlightedName || providerOption.name,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
               )}
             </div>
           </div>

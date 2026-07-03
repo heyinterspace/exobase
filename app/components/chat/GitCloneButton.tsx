@@ -9,6 +9,7 @@ import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/Button';
+import { IconButton } from '~/components/ui/IconButton';
 import type { IChatMetadata } from '~/lib/persistence/db';
 import { X, Github, GitBranch } from 'lucide-react';
 
@@ -45,9 +46,10 @@ const MAX_TOTAL_SIZE = 500 * 1024; // 500KB total limit
 interface GitCloneButtonProps {
   className?: string;
   importChat?: (description: string, messages: Message[], metadata?: IChatMetadata) => Promise<void>;
+  iconOnly?: boolean;
 }
 
-export default function GitCloneButton({ importChat, className }: GitCloneButtonProps) {
+export default function GitCloneButton({ importChat, className, iconOnly }: GitCloneButtonProps) {
   const { ready, gitClone } = useGit();
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -160,33 +162,41 @@ ${escapeBoltTags(file.content)}
     }
   };
 
+  const openDialog = () => {
+    setSelectedProvider(null);
+    setIsDialogOpen(true);
+  };
+
   return (
     <>
-      <Button
-        onClick={() => {
-          setSelectedProvider(null);
-          setIsDialogOpen(true);
-        }}
-        title="Remix a repo"
-        variant="default"
-        size="lg"
-        className={classNames(
-          'gap-2 bg-bolt-elements-background-depth-1',
-          'text-bolt-elements-textPrimary',
-          'hover:bg-bolt-elements-background-depth-2',
-          'border border-bolt-elements-borderColor',
-          'h-10 px-4 py-2 min-w-[120px] justify-center',
-          'transition-all duration-200 ease-in-out',
-          className,
-        )}
-        disabled={!ready || loading}
-      >
-        Remix a repo
-        <div className="flex items-center gap-1 ml-2">
-          <Github className="w-4 h-4" />
+      {iconOnly ? (
+        <IconButton title="Remix a repo" onClick={openDialog} disabled={!ready || loading} className={className}>
           <GitBranch className="w-4 h-4" />
-        </div>
-      </Button>
+        </IconButton>
+      ) : (
+        <Button
+          onClick={openDialog}
+          title="Remix a repo"
+          variant="default"
+          size="lg"
+          className={classNames(
+            'gap-2 bg-bolt-elements-background-depth-1',
+            'text-bolt-elements-textPrimary',
+            'hover:bg-bolt-elements-background-depth-2',
+            'border border-bolt-elements-borderColor',
+            'h-10 px-4 py-2 min-w-[120px] justify-center',
+            'transition-all duration-200 ease-in-out',
+            className,
+          )}
+          disabled={!ready || loading}
+        >
+          Remix a repo
+          <div className="flex items-center gap-1 ml-2">
+            <Github className="w-4 h-4" />
+            <GitBranch className="w-4 h-4" />
+          </div>
+        </Button>
+      )}
 
       {/* Provider Selection Dialog */}
       {isDialogOpen && !selectedProvider && (

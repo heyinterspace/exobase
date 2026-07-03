@@ -11,9 +11,9 @@ const EXAMPLE_PROMPTS = [
 
 export function ExamplePrompts(sendMessage?: { (event: React.UIEvent, messageInput?: string): void | undefined }) {
   return (
-    <div id="examples" className="relative flex flex-col gap-9 w-full mx-auto flex justify-center mt-6">
+    <div id="examples" className="relative flex flex-col w-full mx-auto flex justify-center">
       <div
-        className="flex flex-wrap justify-center gap-2"
+        className="flex flex-wrap gap-2"
         style={{
           animation: '.25s ease-out 0s 1 _fade-and-move-in_g2ptj_1 forwards',
         }}

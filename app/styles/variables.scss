@@ -132,7 +132,10 @@
 }
 
 :root[data-theme='dark'] {
-  --sl-hard: #d4d4d4;
+  /* Dark neutral slate, not white — visible against the near-black page
+     background without reading as a bright/glowing edge. Matches
+     structured.glass's own --neg neutral tone. */
+  --sl-hard: #3c3f4b;
 }
 
 /* Color Tokens Dark Theme */
