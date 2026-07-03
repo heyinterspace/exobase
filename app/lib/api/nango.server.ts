@@ -21,15 +21,20 @@ function getNangoClient(context: any): Nango | null {
 }
 
 /**
- * If the browser holds a Nango GitHub connectionId (set after a successful
- * OAuth popup, see useGitHubConnection.ts), fetch a live, auto-refreshed
- * access token from Nango instead of trusting a client-supplied token — the
- * real GitHub token never has to touch the browser. Returns null if Nango
- * isn't configured or the user hasn't connected via OAuth (falls through to
- * the existing cookie/env token chain in that case).
+ * If the browser holds a Nango connectionId cookie for the given integration
+ * (set after a successful OAuth popup — see useNangoConnect.ts), fetch a
+ * live, auto-refreshed access token from Nango instead of trusting a
+ * client-supplied token — the real provider token never has to touch the
+ * browser. Returns null if Nango isn't configured or the user hasn't
+ * connected via OAuth (callers fall through to their own cookie/env chain).
  */
-export async function getGitHubTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
-  const connectionId = parseCookies(cookieHeader).githubNangoConnectionId;
+export async function getTokenFromNango(
+  cookieHeader: string | null,
+  context: any,
+  integrationId: string,
+  connectionIdCookieName: string,
+): Promise<string | null> {
+  const connectionId = parseCookies(cookieHeader)[connectionIdCookieName];
   const nango = getNangoClient(context);
 
   if (!connectionId || !nango) {
@@ -37,12 +42,20 @@ export async function getGitHubTokenFromNango(cookieHeader: string | null, conte
   }
 
   try {
-    const connection = await nango.getConnection('github', connectionId);
+    const connection = await nango.getConnection(integrationId, connectionId);
     const { credentials } = connection;
 
     return credentials.type === 'OAUTH2' ? credentials.access_token : null;
   } catch (error) {
-    console.error('Failed to fetch GitHub token from Nango:', error);
+    console.error(`Failed to fetch ${integrationId} token from Nango:`, error);
     return null;
   }
+}
+
+export function getGitHubTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
+  return getTokenFromNango(cookieHeader, context, 'github', 'githubNangoConnectionId');
+}
+
+export function getLinearTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
+  return getTokenFromNango(cookieHeader, context, 'linear', 'linearNangoConnectionId');
 }
