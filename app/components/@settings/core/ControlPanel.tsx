@@ -9,10 +9,9 @@ import { useConnectionStatus } from '~/lib/hooks/useConnectionStatus';
 import { tabConfigurationStore, resetTabConfiguration } from '~/lib/stores/settings';
 import { profileStore } from '~/lib/stores/profile';
 import type { TabType, Profile } from './types';
-import { TAB_LABELS, DEFAULT_TAB_CONFIG, TAB_DESCRIPTIONS } from './constants';
+import { TAB_LABELS, DEFAULT_TAB_CONFIG, TAB_DESCRIPTIONS, TAB_GROUPS, SETTINGS_GROUPS } from './constants';
 import { DialogTitle } from '~/components/ui/Dialog';
 import { AvatarDropdown } from './AvatarDropdown';
-import BackgroundRays from '~/components/ui/BackgroundRays';
 
 // Import all tab components
 import ProfileTab from '~/components/@settings/tabs/profile/ProfileTab';
@@ -39,8 +38,8 @@ interface ControlPanelProps {
 const BETA_TABS = new Set<TabType>(['local-providers', 'mcp']);
 
 const BetaLabel = () => (
-  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20">
-    <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400">BETA</span>
+  <div className="absolute top-2 right-2 px-1.5 py-0.5 border border-bolt-elements-borderColor bg-accent/10">
+    <span className="text-[10px] font-mono font-medium text-accent">BETA</span>
   </div>
 );
 
@@ -236,8 +235,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
             <div
               className={classNames(
                 'w-[95vw] max-w-[1200px] h-[85vh] max-h-[900px]',
-                'bg-bolt-elements-background-depth-1',
-                'rounded-2xl shadow-2xl',
+                'glass',
                 'border border-bolt-elements-borderColor',
                 'flex flex-col overflow-hidden',
                 'relative',
@@ -245,22 +243,19 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4',
               )}
             >
-              <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                <BackgroundRays />
-              </div>
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-bolt-elements-borderColor">
                   <div className="flex items-center space-x-4">
                     {(activeTab || showTabManagement) && (
                       <button
                         onClick={handleBack}
-                        className="flex items-center justify-center w-8 h-8 rounded-full bg-transparent hover:bg-purple-500/10 dark:hover:bg-purple-500/20 group transition-colors duration-150"
+                        className="flex items-center justify-center w-8 h-8 bg-transparent hover:bg-accent/10 group transition-colors duration-150"
                       >
-                        <div className="i-ph:arrow-left w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-purple-500 transition-colors" />
+                        <div className="i-ph:arrow-left w-4 h-4 text-bolt-elements-textSecondary group-hover:text-accent transition-colors" />
                       </button>
                     )}
-                    <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                    <DialogTitle className="text-xl font-display font-semibold text-bolt-elements-textPrimary">
                       {showTabManagement ? 'Tab Management' : activeTab ? TAB_LABELS[activeTab] : 'Control Panel'}
                     </DialogTitle>
                   </div>
@@ -274,9 +269,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {/* Close Button */}
                     <button
                       onClick={handleClose}
-                      className="flex items-center justify-center w-8 h-8 rounded-full bg-transparent hover:bg-purple-500/10 dark:hover:bg-purple-500/20 group transition-all duration-200"
+                      className="flex items-center justify-center w-8 h-8 bg-transparent hover:bg-accent/10 group transition-all duration-200"
                     >
-                      <div className="i-ph:x w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-purple-500 transition-colors" />
+                      <div className="i-ph:x w-4 h-4 text-bolt-elements-textSecondary group-hover:text-accent transition-colors" />
                     </button>
                   </div>
                 </div>
@@ -289,8 +284,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     'hover:overflow-y-auto',
                     'scrollbar scrollbar-w-2',
                     'scrollbar-track-transparent',
-                    'scrollbar-thumb-[#E5E5E5] hover:scrollbar-thumb-[#CCCCCC]',
-                    'dark:scrollbar-thumb-[#333333] dark:hover:scrollbar-thumb-[#444444]',
+                    'scrollbar-thumb-bolt-elements-borderColor',
                     'will-change-scroll',
                     'touch-auto',
                   )}
@@ -304,33 +298,51 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {activeTab ? (
                       getTabComponent(activeTab)
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-                        {visibleTabs.map((tab, index) => (
-                          <div
-                            key={tab.id}
-                            className={classNames(
-                              'aspect-[1.5/1] transition-transform duration-100 ease-out',
-                              'hover:scale-[1.01]',
-                            )}
-                            style={{
-                              animationDelay: `${index * 30}ms`,
-                              animation: open ? 'fadeInUp 200ms ease-out forwards' : 'none',
-                            }}
-                          >
-                            <TabTile
-                              tab={tab}
-                              onClick={() => handleTabClick(tab.id as TabType)}
-                              isActive={activeTab === tab.id}
-                              hasUpdate={getTabUpdateStatus(tab.id)}
-                              statusMessage={getStatusMessage(tab.id)}
-                              description={TAB_DESCRIPTIONS[tab.id]}
-                              isLoading={loadingTab === tab.id}
-                              className="h-full relative"
-                            >
-                              {BETA_TABS.has(tab.id) && <BetaLabel />}
-                            </TabTile>
-                          </div>
-                        ))}
+                      <div className="flex flex-col gap-8">
+                        {SETTINGS_GROUPS.map((group) => {
+                          const tabsInGroup = visibleTabs.filter((tab) => TAB_GROUPS[tab.id as TabType] === group.id);
+
+                          if (tabsInGroup.length === 0) {
+                            return null;
+                          }
+
+                          return (
+                            <div key={group.id}>
+                              <h2 className="font-display font-semibold text-bolt-elements-textPrimary mb-0.5">
+                                {group.label}
+                              </h2>
+                              <p className="text-sm text-bolt-elements-textTertiary mb-4">{group.description}</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+                                {tabsInGroup.map((tab, index) => (
+                                  <div
+                                    key={tab.id}
+                                    className={classNames(
+                                      'aspect-[1.5/1] transition-transform duration-100 ease-out',
+                                      'hover:scale-[1.01]',
+                                    )}
+                                    style={{
+                                      animationDelay: `${index * 30}ms`,
+                                      animation: open ? 'fadeInUp 200ms ease-out forwards' : 'none',
+                                    }}
+                                  >
+                                    <TabTile
+                                      tab={tab}
+                                      onClick={() => handleTabClick(tab.id as TabType)}
+                                      isActive={activeTab === tab.id}
+                                      hasUpdate={getTabUpdateStatus(tab.id)}
+                                      statusMessage={getStatusMessage(tab.id)}
+                                      description={TAB_DESCRIPTIONS[tab.id]}
+                                      isLoading={loadingTab === tab.id}
+                                      className="h-full relative"
+                                    >
+                                      {BETA_TABS.has(tab.id) && <BetaLabel />}
+                                    </TabTile>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
