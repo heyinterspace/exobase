@@ -6,7 +6,11 @@ import { chatId } from '~/lib/persistence/useChatHistory';
 import { fetchSupabaseStats } from '~/lib/stores/supabase';
 import { Dialog, DialogRoot, DialogClose, DialogTitle, DialogButton } from '~/components/ui/Dialog';
 
-export function SupabaseConnection() {
+interface SupabaseConnectionProps {
+  hideTrigger?: boolean;
+}
+
+export function SupabaseConnection({ hideTrigger }: SupabaseConnectionProps = {}) {
   const {
     connection: supabaseConn,
     connecting,
@@ -77,25 +81,27 @@ export function SupabaseConnection() {
 
   return (
     <div className="relative">
-      <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden mr-2 text-sm">
-        <Button
-          active
-          disabled={connecting}
-          onClick={() => setIsDialogOpen(!isDialogOpen)}
-          className="hover:bg-bolt-elements-item-backgroundActive !text-white flex items-center gap-2"
-        >
-          <img
-            className="w-4 h-4"
-            height="20"
-            width="20"
-            crossOrigin="anonymous"
-            src="https://cdn.simpleicons.org/supabase"
-          />
-          {isConnected && supabaseConn.project && (
-            <span className="ml-1 text-xs max-w-[100px] truncate">{supabaseConn.project.name}</span>
-          )}
-        </Button>
-      </div>
+      {!hideTrigger && (
+        <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden mr-2 text-sm">
+          <Button
+            active
+            disabled={connecting}
+            onClick={() => setIsDialogOpen(!isDialogOpen)}
+            className="hover:bg-bolt-elements-item-backgroundActive !text-white flex items-center gap-2"
+          >
+            <img
+              className="w-4 h-4"
+              height="20"
+              width="20"
+              crossOrigin="anonymous"
+              src="https://cdn.simpleicons.org/supabase"
+            />
+            {isConnected && supabaseConn.project && (
+              <span className="ml-1 text-xs max-w-[100px] truncate">{supabaseConn.project.name}</span>
+            )}
+          </Button>
+        </div>
+      )}
 
       <DialogRoot open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         {isDialogOpen && (

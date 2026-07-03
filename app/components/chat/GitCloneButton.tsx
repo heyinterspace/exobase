@@ -9,7 +9,6 @@ import { LoadingOverlay } from '~/components/ui/LoadingOverlay';
 
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/Button';
-import { IconButton } from '~/components/ui/IconButton';
 import type { IChatMetadata } from '~/lib/persistence/db';
 import { X, Github, GitBranch } from 'lucide-react';
 
@@ -170,9 +169,24 @@ ${escapeBoltTags(file.content)}
   return (
     <>
       {iconOnly ? (
-        <IconButton title="Remix a repo" onClick={openDialog} disabled={!ready || loading} className={className}>
-          <GitBranch className="w-4 h-4" />
-        </IconButton>
+        <button
+          type="button"
+          title="Remix a repo"
+          onClick={openDialog}
+          disabled={!ready || loading}
+          className={classNames(
+            'flex items-center gap-1 px-2 py-1.5 shrink-0',
+            'border border-bolt-elements-borderColor shadow-hard press-hard',
+            'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary',
+            'hover:border-accent hover:text-accent',
+            'text-xs font-medium transition-theme',
+            'disabled:opacity-30 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard',
+            className,
+          )}
+        >
+          <Github className="w-4 h-4" />
+          Remix
+        </button>
       ) : (
         <Button
           onClick={openDialog}

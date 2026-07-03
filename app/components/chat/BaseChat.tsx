@@ -27,7 +27,6 @@ import { expoUrlAtom } from '~/lib/stores/qrCodeStore';
 import { useStore } from '@nanostores/react';
 import { StickToBottom, useStickToBottomContext } from '~/lib/hooks';
 import { ChatBox } from './ChatBox';
-import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
 import LlmErrorAlert from './LLMApiAlert';
 
@@ -43,7 +42,6 @@ interface BaseChatProps {
   onStreamingChange?: (streaming: boolean) => void;
   messages?: Message[];
   description?: string;
-  enhancingPrompt?: boolean;
   promptEnhanced?: boolean;
   input?: string;
   model?: string;
@@ -54,7 +52,6 @@ interface BaseChatProps {
   handleStop?: () => void;
   sendMessage?: (event: React.UIEvent, messageInput?: string) => void;
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  enhancePrompt?: () => void;
   importChat?: (description: string, messages: Message[]) => Promise<void>;
   exportChat?: () => void;
   uploadedFiles?: File[];
@@ -73,12 +70,9 @@ interface BaseChatProps {
   chatMode?: 'discuss' | 'build';
   setChatMode?: (mode: 'discuss' | 'build') => void;
   append?: (message: Message) => void;
-  designScheme?: DesignScheme;
-  setDesignScheme?: (scheme: DesignScheme) => void;
   selectedElement?: ElementInfo | null;
   setSelectedElement?: (element: ElementInfo | null) => void;
   addToolResult?: ({ toolCallId, result }: { toolCallId: string; result: any }) => void;
-  onWebSearchResult?: (result: string) => void;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -95,11 +89,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       setProvider,
       providerList,
       input = '',
-      enhancingPrompt,
       handleInputChange,
 
       // promptEnhanced,
-      enhancePrompt,
       sendMessage,
       handleStop,
       importChat,
@@ -121,14 +113,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       chatMode,
       setChatMode,
       append,
-      designScheme,
-      setDesignScheme,
       selectedElement,
       setSelectedElement,
       addToolResult = () => {
         throw new Error('addToolResult not implemented');
       },
-      onWebSearchResult,
     },
     ref,
   ) => {
@@ -452,8 +441,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   isStreaming={isStreaming}
                   handleStop={handleStop}
                   handleSendMessage={handleSendMessage}
-                  enhancingPrompt={enhancingPrompt}
-                  enhancePrompt={enhancePrompt}
                   isListening={isListening}
                   startListening={startListening}
                   stopListening={stopListening}
@@ -463,12 +450,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   setQrModalOpen={setQrModalOpen}
                   handleFileUpload={handleFileUpload}
                   chatMode={chatMode}
-                  setChatMode={setChatMode}
-                  designScheme={designScheme}
-                  setDesignScheme={setDesignScheme}
                   selectedElement={selectedElement}
                   setSelectedElement={setSelectedElement}
-                  onWebSearchResult={onWebSearchResult}
                 />
               </div>
             </StickToBottom>

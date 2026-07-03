@@ -92,7 +92,7 @@ export const ChatImpl = memo(
     const [searchParams, setSearchParams] = useSearchParams();
     const [fakeLoading, setFakeLoading] = useState(false);
     const files = useStore(workbenchStore.files);
-    const [designScheme, setDesignScheme] = useState<DesignScheme>(defaultDesignScheme);
+    const [designScheme] = useState<DesignScheme>(defaultDesignScheme);
     const actionAlert = useStore(workbenchStore.alert);
     const deployAlert = useStore(workbenchStore.deployAlert);
     const supabaseConn = useStore(supabaseConnection);
@@ -191,7 +191,7 @@ export const ChatImpl = memo(
       }
     }, [model, provider, searchParams]);
 
-    const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer();
+    const { promptEnhanced, resetEnhancer } = usePromptEnhancer();
     const { parsedMessages, parseMessages } = useMessageParser();
 
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
@@ -209,14 +209,6 @@ export const ChatImpl = memo(
         storeMessageHistory,
       });
     }, [messages, isLoading, parseMessages]);
-
-    const scrollTextArea = () => {
-      const textarea = textareaRef.current;
-
-      if (textarea) {
-        textarea.scrollTop = textarea.scrollHeight;
-      }
-    };
 
     const abort = () => {
       stop();
@@ -594,20 +586,6 @@ export const ChatImpl = memo(
       Cookies.set('selectedProvider', newProvider.name, { expires: 30 });
     };
 
-    const handleWebSearchResult = useCallback(
-      (result: string) => {
-        const currentInput = input || '';
-        const newInput = currentInput.length > 0 ? `${result}\n\n${currentInput}` : result;
-
-        // Update the input via the same mechanism as handleInputChange
-        const syntheticEvent = {
-          target: { value: newInput },
-        } as React.ChangeEvent<HTMLTextAreaElement>;
-        handleInputChange(syntheticEvent);
-      },
-      [input, handleInputChange],
-    );
-
     return (
       <BaseChat
         ref={animationScope}
@@ -619,7 +597,6 @@ export const ChatImpl = memo(
         onStreamingChange={(streaming) => {
           streamingState.set(streaming);
         }}
-        enhancingPrompt={enhancingPrompt}
         promptEnhanced={promptEnhanced}
         sendMessage={sendMessage}
         model={model}
@@ -645,18 +622,6 @@ export const ChatImpl = memo(
             content: parsedMessages[i] || '',
           };
         })}
-        enhancePrompt={() => {
-          enhancePrompt(
-            input,
-            (input) => {
-              setInput(input);
-              scrollTextArea();
-            },
-            model,
-            provider,
-            apiKeys,
-          );
-        }}
         uploadedFiles={uploadedFiles}
         setUploadedFiles={setUploadedFiles}
         imageDataList={imageDataList}
@@ -673,12 +638,9 @@ export const ChatImpl = memo(
         chatMode={chatMode}
         setChatMode={setChatMode}
         append={append}
-        designScheme={designScheme}
-        setDesignScheme={setDesignScheme}
         selectedElement={selectedElement}
         setSelectedElement={setSelectedElement}
         addToolResult={addToolResult}
-        onWebSearchResult={handleWebSearchResult}
       />
     );
   },

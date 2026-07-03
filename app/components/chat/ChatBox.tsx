@@ -8,8 +8,6 @@ import { ApiKeyDialog } from './ApiKeyDialog';
 import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
 import FilePreview from './FilePreview';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
-import { IconButton } from '~/components/ui/IconButton';
-import { toast } from 'react-toastify';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import { SupabaseConnection } from './SupabaseConnection';
 import { ExpoQrModal } from '~/components/workbench/ExpoQrModal';
@@ -17,11 +15,7 @@ import { ExamplePrompts } from './ExamplePrompts';
 import GitCloneButton from './GitCloneButton';
 import styles from './BaseChat.module.scss';
 import type { ProviderInfo } from '~/types/model';
-import { ColorSchemeDialog } from '~/components/ui/ColorSchemeDialog';
-import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
-import { McpTools } from './MCPTools';
-import { WebSearch } from './WebSearch.client';
 
 interface ChatBoxProps {
   provider: any;
@@ -54,13 +48,7 @@ interface ChatBoxProps {
   setImageDataList?: ((dataList: string[]) => void) | undefined;
   handleInputChange?: ((event: React.ChangeEvent<HTMLTextAreaElement>) => void) | undefined;
   handleStop?: (() => void) | undefined;
-  enhancingPrompt?: boolean | undefined;
-  enhancePrompt?: (() => void) | undefined;
-  onWebSearchResult?: (result: string) => void;
   chatMode?: 'discuss' | 'build';
-  setChatMode?: (mode: 'discuss' | 'build') => void;
-  designScheme?: DesignScheme;
-  setDesignScheme?: (scheme: DesignScheme) => void;
   selectedElement?: ElementInfo | null;
   setSelectedElement?: ((element: ElementInfo | null) => void) | undefined;
   importChat?: (description: string, messages: any[]) => Promise<void>;
@@ -259,52 +247,30 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                 />
               )}
             </ClientOnly>
-            <ColorSchemeDialog designScheme={props.designScheme} setDesignScheme={props.setDesignScheme} />
-            <McpTools />
-            <IconButton title="Upload file" className="transition-all" onClick={() => props.handleFileUpload()}>
-              <div className="i-ph:paperclip text-xl"></div>
-            </IconButton>
-            <WebSearch onSearchResult={(result) => props.onWebSearchResult?.(result)} disabled={props.isStreaming} />
-            <IconButton
-              title="Enhance prompt"
-              disabled={props.input.length === 0 || props.enhancingPrompt}
-              className={classNames('transition-all', props.enhancingPrompt ? 'opacity-100' : '')}
-              onClick={() => {
-                props.enhancePrompt?.();
-                toast.success('Prompt enhanced!');
-              }}
-            >
-              {props.enhancingPrompt ? (
-                <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl animate-spin"></div>
-              ) : (
-                <div className="i-bolt:stars text-xl"></div>
+            <button
+              type="button"
+              title="Attach a file"
+              onClick={() => props.handleFileUpload()}
+              className={classNames(
+                'flex items-center gap-1 px-2 py-1.5 shrink-0',
+                'border border-bolt-elements-borderColor shadow-hard press-hard',
+                'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary',
+                'hover:border-accent hover:text-accent',
+                'text-xs font-medium transition-theme',
               )}
-            </IconButton>
+            >
+              <div className="i-ph:paperclip text-sm" />
+              Attach
+            </button>
+            <GitCloneButton iconOnly importChat={props.importChat} />
             <SpeechRecognitionButton
               isListening={props.isListening}
               onStart={props.startListening}
               onStop={props.stopListening}
               disabled={props.isStreaming}
             />
-            <GitCloneButton iconOnly importChat={props.importChat} />
-            <SupabaseConnection />
-            {props.chatStarted && (
-              <IconButton
-                title="Discuss"
-                className={classNames(
-                  'transition-all flex items-center gap-1 px-1.5',
-                  props.chatMode === 'discuss'
-                    ? '!bg-bolt-elements-item-backgroundAccent !text-bolt-elements-item-contentAccent'
-                    : 'bg-bolt-elements-item-backgroundDefault text-bolt-elements-item-contentDefault',
-                )}
-                onClick={() => {
-                  props.setChatMode?.(props.chatMode === 'discuss' ? 'build' : 'discuss');
-                }}
-              >
-                <div className={`i-ph:chats text-xl`} />
-                {props.chatMode === 'discuss' ? <span>Discuss</span> : <span />}
-              </IconButton>
-            )}
+            {/* Mounted headlessly so the in-chat "Connect to Supabase" alert can still open this dialog */}
+            <SupabaseConnection hideTrigger />
           </div>
 
           <button
