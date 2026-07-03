@@ -134,7 +134,11 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
           </button>
         </div>
       )}
-      <div className={classNames('relative border border-bolt-elements-borderColor backdrop-blur')}>
+      <div
+        className={classNames(
+          'relative border border-bolt-elements-borderColor shadow-hard bg-bolt-elements-background-depth-2',
+        )}
+      >
         <textarea
           ref={props.textareaRef}
           className={classNames(
@@ -224,89 +228,89 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
         )}
 
         {props.input.length > 3 && (
-          <div className="px-4 text-xs text-bolt-elements-textTertiary">
-            Use <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-2">Shift</kbd> +{' '}
-            <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-2">Return</kbd> for a new line
+          <div className="px-4 pb-3 text-xs text-bolt-elements-textTertiary">
+            Use <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-3">Shift</kbd> +{' '}
+            <kbd className="kdb px-1.5 py-0.5 bg-bolt-elements-background-depth-3">Return</kbd> for a new line
           </div>
         )}
+      </div>
 
-        <div className="flex justify-between items-center text-sm p-3 pt-2 gap-2">
-          <div className="flex gap-1 items-center flex-wrap">
-            <ClientOnly>
-              {() => (
-                <ModelSelector
-                  key={props.provider?.name + ':' + props.modelList.length}
-                  model={props.model}
-                  setModel={props.setModel}
-                  modelList={props.modelList}
-                  provider={props.provider}
-                  setProvider={props.setProvider}
-                  providerList={props.providerList || (PROVIDER_LIST as ProviderInfo[])}
-                  apiKeys={props.apiKeys}
-                  modelLoading={props.isModelLoading}
-                />
-              )}
-            </ClientOnly>
-            <button
-              type="button"
-              title="Attach a file"
-              onClick={() => props.handleFileUpload()}
-              className={classNames(
-                'flex items-center gap-1 px-2 py-1.5 shrink-0',
-                'border border-bolt-elements-borderColor shadow-hard press-hard',
-                'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary',
-                'hover:border-accent hover:text-accent',
-                'text-xs font-medium transition-theme',
-              )}
-            >
-              <div className="i-ph:paperclip text-sm" />
-              Attach
-            </button>
-            <GitCloneButton iconOnly importChat={props.importChat} />
-            <SpeechRecognitionButton
-              isListening={props.isListening}
-              onStart={props.startListening}
-              onStop={props.stopListening}
-              disabled={props.isStreaming}
-            />
-            {/* Mounted headlessly so the in-chat "Connect to Supabase" alert can still open this dialog */}
-            <SupabaseConnection hideTrigger />
-          </div>
-
+      <div className="flex justify-between items-center text-sm pt-2 gap-2">
+        <div className="flex gap-1 items-center flex-wrap">
+          <ClientOnly>
+            {() => (
+              <ModelSelector
+                key={props.provider?.name + ':' + props.modelList.length}
+                model={props.model}
+                setModel={props.setModel}
+                modelList={props.modelList}
+                provider={props.provider}
+                setProvider={props.setProvider}
+                providerList={props.providerList || (PROVIDER_LIST as ProviderInfo[])}
+                apiKeys={props.apiKeys}
+                modelLoading={props.isModelLoading}
+              />
+            )}
+          </ClientOnly>
           <button
             type="button"
-            onClick={(event) => {
-              if (props.isStreaming) {
-                props.handleStop?.();
-                return;
-              }
-
-              if (canSubmit) {
-                guardedSend(event);
-              }
-            }}
-            disabled={!canSubmit && !props.isStreaming}
+            title="Attach a file"
+            onClick={() => props.handleFileUpload()}
             className={classNames(
-              'flex items-center gap-1.5 px-3 py-1.5 shrink-0',
+              'flex items-center gap-1 px-2 py-1.5 shrink-0',
               'border border-bolt-elements-borderColor shadow-hard press-hard',
-              'bg-accent text-accent-ink hover:brightness-110',
-              'text-xs font-semibold transition-[filter]',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard',
+              'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary',
+              'hover:border-accent hover:text-accent',
+              'text-xs font-medium transition-theme',
             )}
           >
-            {props.isStreaming ? (
-              <>
-                <div className="i-ph:stop-circle-bold w-4 h-4" />
-                Stop
-              </>
-            ) : (
-              <>
-                <div className="i-ph:rocket-launch-fill w-4 h-4" />
-                Launch
-              </>
-            )}
+            <div className="i-ph:paperclip text-sm" />
+            Attach
           </button>
+          <GitCloneButton iconOnly importChat={props.importChat} />
+          <SpeechRecognitionButton
+            isListening={props.isListening}
+            onStart={props.startListening}
+            onStop={props.stopListening}
+            disabled={props.isStreaming}
+          />
+          {/* Mounted headlessly so the in-chat "Connect to Supabase" alert can still open this dialog */}
+          <SupabaseConnection hideTrigger />
         </div>
+
+        <button
+          type="button"
+          onClick={(event) => {
+            if (props.isStreaming) {
+              props.handleStop?.();
+              return;
+            }
+
+            if (canSubmit) {
+              guardedSend(event);
+            }
+          }}
+          disabled={!canSubmit && !props.isStreaming}
+          className={classNames(
+            'flex items-center gap-1.5 px-3 py-1.5 shrink-0',
+            'border border-bolt-elements-borderColor shadow-hard press-hard',
+            'bg-accent text-accent-ink hover:brightness-110',
+            'text-xs font-semibold transition-[filter]',
+            'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard',
+          )}
+        >
+          {props.isStreaming ? (
+            <>
+              <div className="i-ph:stop-circle-bold w-4 h-4" />
+              Stop
+            </>
+          ) : (
+            <>
+              <div className="i-ph:rocket-launch-fill w-4 h-4" />
+              Launch
+            </>
+          )}
+        </button>
       </div>
 
       <ExpoQrModal open={props.qrModalOpen} onClose={() => props.setQrModalOpen(false)} />
