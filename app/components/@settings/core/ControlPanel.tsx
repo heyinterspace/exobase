@@ -235,7 +235,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
           >
             <div
               className={classNames(
-                'w-[1200px] h-[90vh]',
+                'w-[95vw] max-w-[1200px] h-[85vh] max-h-[900px]',
                 'bg-bolt-elements-background-depth-1',
                 'rounded-2xl shadow-2xl',
                 'border border-bolt-elements-borderColor',
