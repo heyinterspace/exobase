@@ -26,107 +26,66 @@ export const TabTile: React.FC<TabTileProps> = ({
   className,
   children,
 }: TabTileProps) => {
+  const IconComponent = TAB_ICONS[tab.id];
+
   return (
     <Tooltip.Provider delayDuration={0}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
-          <div className={classNames('min-h-[160px] list-none', className || '')}>
-            <div
-              onClick={onClick}
+          <div
+            onClick={onClick}
+            className={classNames(
+              'flex items-center gap-3 px-3 py-2.5',
+              'group cursor-pointer',
+              'hover:bg-bolt-elements-background-depth-2',
+              'transition-colors duration-100 ease-out',
+              isActive ? 'bg-accent/10' : '',
+              isLoading ? 'cursor-wait opacity-70 pointer-events-none' : '',
+              className || '',
+            )}
+          >
+            <IconComponent
               className={classNames(
-                'relative flex flex-col items-center justify-center h-full p-4',
-                'border border-bolt-elements-borderColor',
-                'bg-bolt-elements-background-depth-2',
-                'group cursor-pointer',
-                'hover:border-accent',
-                'transition-colors duration-100 ease-out',
-                isActive ? 'bg-accent/10 border-accent' : '',
-                isLoading ? 'cursor-wait opacity-70 pointer-events-none' : '',
+                'w-4 h-4 shrink-0',
+                'text-bolt-elements-textSecondary',
+                'group-hover:text-accent',
+                isActive ? 'text-accent' : '',
               )}
-            >
-              {/* Icon */}
-              <div
-                className={classNames(
-                  'relative',
-                  'w-14 h-14',
-                  'flex items-center justify-center',
-                  'border border-bolt-elements-borderColor',
-                  'bg-bolt-elements-background-depth-3',
-                  'group-hover:border-accent',
-                  'transition-all duration-100 ease-out',
-                  isActive ? 'border-accent bg-accent/10' : '',
-                )}
-              >
-                {(() => {
-                  const IconComponent = TAB_ICONS[tab.id];
-                  return (
-                    <IconComponent
-                      className={classNames(
-                        'w-8 h-8',
-                        'text-bolt-elements-textSecondary',
-                        'group-hover:text-accent',
-                        'transition-colors duration-100 ease-out',
-                        isActive ? 'text-accent' : '',
-                      )}
-                    />
-                  );
-                })()}
-              </div>
+            />
 
-              {/* Label and Description */}
-              <div className="flex flex-col items-center mt-4 w-full">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
                 <h3
                   className={classNames(
-                    'font-display text-[15px] font-medium leading-snug mb-2',
+                    'font-display text-sm font-medium leading-snug',
                     'text-bolt-elements-textPrimary',
                     'group-hover:text-accent',
-                    'transition-colors duration-100 ease-out',
                     isActive ? 'text-accent' : '',
                   )}
                 >
                   {TAB_LABELS[tab.id]}
                 </h3>
-                {description && (
-                  <p
-                    className={classNames(
-                      'text-[13px] leading-relaxed',
-                      'text-bolt-elements-textTertiary',
-                      'max-w-[85%]',
-                      'text-center',
-                      'transition-colors duration-100 ease-out',
-                    )}
-                  >
-                    {description}
-                  </p>
-                )}
+                {children}
               </div>
-
-              {/* Update Indicator with Tooltip */}
-              {hasUpdate && (
-                <>
-                  <div className="absolute top-4 right-4 w-2 h-2 bg-accent animate-pulse" />
-                  <Tooltip.Portal>
-                    <Tooltip.Content
-                      className={classNames(
-                        'px-3 py-1.5 border border-bolt-elements-borderColor',
-                        'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary',
-                        'text-sm font-medium',
-                        'select-none',
-                        'z-[100]',
-                      )}
-                      side="top"
-                      sideOffset={5}
-                    >
-                      {statusMessage}
-                      <Tooltip.Arrow className="fill-bolt-elements-background-depth-3" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </>
-              )}
-
-              {/* Children (e.g. Beta Label) */}
-              {children}
+              {description && <p className="text-xs text-bolt-elements-textTertiary truncate">{description}</p>}
             </div>
+
+            {hasUpdate && <div className="w-1.5 h-1.5 bg-accent shrink-0" />}
+
+            <div className="i-ph:caret-right w-3.5 h-3.5 text-bolt-elements-textTertiary group-hover:text-accent shrink-0" />
+
+            {hasUpdate && statusMessage && (
+              <Tooltip.Portal>
+                <Tooltip.Content
+                  className="px-3 py-1.5 border border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary text-sm font-medium select-none z-[100]"
+                  side="top"
+                  sideOffset={5}
+                >
+                  {statusMessage}
+                  <Tooltip.Arrow className="fill-bolt-elements-background-depth-3" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            )}
           </div>
         </Tooltip.Trigger>
       </Tooltip.Root>

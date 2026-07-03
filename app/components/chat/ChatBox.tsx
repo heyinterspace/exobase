@@ -69,7 +69,7 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
   return (
     <div
       className={classNames(
-        'relative glass p-3 border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+        'relative glass p-3 border border-bolt-elements-borderColor shadow-hard-lg relative w-full max-w-chat mx-auto z-prompt',
 
         /*
          * {
@@ -239,7 +239,9 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             maxHeight: props.TEXTAREA_MAX_HEIGHT,
           }}
           placeholder={
-            props.chatMode === 'build' ? 'How can Exobase help you today?' : 'What would you like to discuss?'
+            props.chatMode === 'build'
+              ? 'Describe the app you want to build to get started'
+              : 'What would you like to discuss?'
           }
           translate="no"
         />

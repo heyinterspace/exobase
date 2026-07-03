@@ -38,9 +38,9 @@ interface ControlPanelProps {
 const BETA_TABS = new Set<TabType>(['local-providers', 'mcp']);
 
 const BetaLabel = () => (
-  <div className="absolute top-2 right-2 px-1.5 py-0.5 border border-bolt-elements-borderColor bg-accent/10">
-    <span className="text-[10px] font-mono font-medium text-accent">BETA</span>
-  </div>
+  <span className="px-1 py-px border border-accent bg-accent/10 text-[9px] font-mono font-medium text-accent shrink-0">
+    BETA
+  </span>
 );
 
 export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
@@ -236,7 +236,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
               className={classNames(
                 'w-[95vw] max-w-[1200px] h-[85vh] max-h-[900px]',
                 'glass',
-                'border border-bolt-elements-borderColor',
+                'border border-bolt-elements-borderColor shadow-hard-lg',
                 'flex flex-col overflow-hidden',
                 'relative',
                 'transform transition-all duration-200 ease-out',
@@ -298,7 +298,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {activeTab ? (
                       getTabComponent(activeTab)
                     ) : (
-                      <div className="flex flex-col gap-8">
+                      <div className="flex flex-col gap-6">
                         {SETTINGS_GROUPS.map((group) => {
                           const tabsInGroup = visibleTabs.filter((tab) => TAB_GROUPS[tab.id as TabType] === group.id);
 
@@ -308,36 +308,23 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
 
                           return (
                             <div key={group.id}>
-                              <h2 className="font-display font-semibold text-bolt-elements-textPrimary mb-0.5">
+                              <h2 className="font-display text-sm font-semibold text-bolt-elements-textPrimary mb-2">
                                 {group.label}
                               </h2>
-                              <p className="text-sm text-bolt-elements-textTertiary mb-4">{group.description}</p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-                                {tabsInGroup.map((tab, index) => (
-                                  <div
+                              <div className="border border-bolt-elements-borderColor divide-y divide-bolt-elements-borderColor">
+                                {tabsInGroup.map((tab) => (
+                                  <TabTile
                                     key={tab.id}
-                                    className={classNames(
-                                      'aspect-[1.5/1] transition-transform duration-100 ease-out',
-                                      'hover:scale-[1.01]',
-                                    )}
-                                    style={{
-                                      animationDelay: `${index * 30}ms`,
-                                      animation: open ? 'fadeInUp 200ms ease-out forwards' : 'none',
-                                    }}
+                                    tab={tab}
+                                    onClick={() => handleTabClick(tab.id as TabType)}
+                                    isActive={activeTab === tab.id}
+                                    hasUpdate={getTabUpdateStatus(tab.id)}
+                                    statusMessage={getStatusMessage(tab.id)}
+                                    description={TAB_DESCRIPTIONS[tab.id]}
+                                    isLoading={loadingTab === tab.id}
                                   >
-                                    <TabTile
-                                      tab={tab}
-                                      onClick={() => handleTabClick(tab.id as TabType)}
-                                      isActive={activeTab === tab.id}
-                                      hasUpdate={getTabUpdateStatus(tab.id)}
-                                      statusMessage={getStatusMessage(tab.id)}
-                                      description={TAB_DESCRIPTIONS[tab.id]}
-                                      isLoading={loadingTab === tab.id}
-                                      className="h-full relative"
-                                    >
-                                      {BETA_TABS.has(tab.id) && <BetaLabel />}
-                                    </TabTile>
-                                  </div>
+                                    {BETA_TABS.has(tab.id) && <BetaLabel />}
+                                  </TabTile>
                                 ))}
                               </div>
                             </div>

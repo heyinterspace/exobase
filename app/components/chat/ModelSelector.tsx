@@ -455,7 +455,7 @@ export const ModelSelector = ({
       <div className="relative flex w-full" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
         <div
           className={classNames(
-            'w-full p-2 rounded-lg border border-bolt-elements-borderColor',
+            'w-full p-2 rounded-lg border border-bolt-elements-borderColor shadow-hard',
             'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
             'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
             'transition-all cursor-pointer',
@@ -505,7 +505,7 @@ export const ModelSelector = ({
                       'flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all',
                       'hover:bg-bolt-elements-background-depth-3',
                       showFreeModelsOnly
-                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        ? 'bg-accent/20 text-accent border border-accent'
                         : 'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary border border-bolt-elements-borderColor',
                     )}
                   >
@@ -666,7 +666,7 @@ export const ModelSelector = ({
                       </div>
                       <div className="flex items-center gap-1 ml-2">
                         {isModelLikelyFree(modelOption, provider?.name) && (
-                          <span className="i-ph:gift text-xs text-purple-400" title="Free model" />
+                          <span className="i-ph:gift text-xs text-bolt-elements-textTertiary" title="Free model" />
                         )}
                         {model === modelOption.name && (
                           <span className="i-ph:check text-xs text-green-500" title="Selected" />
@@ -720,7 +720,7 @@ export const ModelSelector = ({
             <div className="relative flex w-full">
               <div
                 className={classNames(
-                  'w-full p-2 rounded-lg border border-bolt-elements-borderColor',
+                  'w-full p-2 rounded-lg border border-bolt-elements-borderColor shadow-hard',
                   'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
                   'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
                   'transition-all cursor-pointer',
