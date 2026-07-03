@@ -1,0 +1,316 @@
+/* ============================================================
+   STRUCTURED LIQUIDITY — component KIT
+   A shadcn-complete library expressed in the design language:
+   rigid containers (sharp edges, flat offset shadows, real
+   borders) holding viscous glass surfaces, with one accent
+   carrying every emphasis.
+   ============================================================ */
+
+/* ---- gallery scaffold ---- */
+.kit-groups { display: flex; flex-direction: column; gap: 2.2rem; }
+.kit-group > .kit-group-head { display: flex; align-items: baseline; gap: 0.8rem; margin-bottom: 1rem; }
+.kit-group-head .kg-name { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); }
+.kit-group-head .kg-rule { flex: 1; height: 2px; background: rgba(var(--edge),0.25); }
+.kit-group-head .kg-count { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-dim); }
+
+.kit-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1rem; }
+.kit-cell { padding: 1.2rem 1.25rem; display: flex; flex-direction: column; gap: 0.95rem; grid-column: span 4; min-width: 0; }
+.kit-cell.w6 { grid-column: span 6; }
+.kit-cell.w8 { grid-column: span 8; }
+.kit-cell.w12 { grid-column: span 12; }
+@media (max-width: 900px) { .kit-cell, .kit-cell.w6, .kit-cell.w8 { grid-column: span 6; } .kit-cell.w12 { grid-column: span 12; } }
+@media (max-width: 600px) { .kit-cell, .kit-cell.w6, .kit-cell.w8, .kit-cell.w12 { grid-column: span 12; } }
+.kit-cap { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); display: flex; align-items: center; gap: 0.5rem; }
+.kit-cap::before { content: ""; width: 7px; height: 7px; background: var(--accent); flex: none; }
+.kit-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.kit-col { display: flex; flex-direction: column; gap: 0.7rem; }
+.kit-demo { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
+
+/* glass + flat helpers reused locally */
+.sl-glass-fill {
+  background: linear-gradient(135deg, rgba(var(--glass-tint),0.12), rgba(var(--glass-tint),0.04));
+  backdrop-filter: blur(10px) saturate(170%); -webkit-backdrop-filter: blur(10px) saturate(170%);
+}
+
+/* ============================================================
+   BUTTONS — full variant matrix
+   ============================================================ */
+.sl-btn {
+  font-family: var(--display); font-weight: 700; font-size: 0.85rem; line-height: 1;
+  padding: 0.6rem 1rem; border-radius: var(--radius); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  border: var(--border-w) solid rgb(var(--edge)); color: var(--ink); text-decoration: none;
+  transition: transform 0.12s cubic-bezier(.2,.8,.2,1), box-shadow 0.12s; white-space: nowrap;
+}
+.sl-btn.default { background: var(--accent); color: var(--accent-ink); box-shadow: 4px 4px 0 0 var(--hard-shadow); }
+.sl-btn.secondary { background: linear-gradient(135deg, rgba(var(--glass-tint),0.14), rgba(var(--glass-tint),0.05)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 4px 4px 0 0 var(--hard-shadow); }
+.sl-btn.outline { background: transparent; box-shadow: 4px 4px 0 0 var(--hard-shadow); }
+.sl-btn.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--ink-dim); }
+.sl-btn.ghost:hover { color: var(--ink); background: rgba(var(--glass-tint),0.08); transform: none; }
+.sl-btn.destructive { background: var(--neg); color: var(--neg-ink); box-shadow: 4px 4px 0 0 var(--hard-shadow); }
+.sl-btn.link { border-color: transparent; box-shadow: none; background: none; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 0.6rem 0.2rem; }
+.sl-btn.link:hover { transform: none; }
+.sl-btn.icon { padding: 0.55rem; width: 38px; height: 38px; }
+.sl-btn.sm { padding: 0.4rem 0.7rem; font-size: 0.76rem; }
+.sl-btn.lg { padding: 0.8rem 1.3rem; font-size: 0.95rem; }
+.sl-btn:not(.ghost):not(.link):hover, .sl-btn:not(.ghost):not(.link):active { transform: translate(4px, 4px); box-shadow: 0 0 0 0 var(--hard-shadow); }
+.sl-btn[disabled] { opacity: 0.4; pointer-events: none; }
+.sl-spinner { width: 13px; height: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sl-spin 0.7s linear infinite; }
+@keyframes sl-spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   BADGE
+   ============================================================ */
+.sl-badge { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.28rem 0.55rem; border-radius: var(--radius); border: 1.5px solid rgb(var(--edge)); display: inline-flex; align-items: center; gap: 0.35rem; }
+.sl-badge.default { background: var(--accent); color: var(--accent-ink); }
+.sl-badge.secondary { background: rgba(var(--glass-tint),0.1); color: var(--ink); }
+.sl-badge.outline { background: transparent; color: var(--ink-dim); }
+.sl-badge.destructive { background: var(--neg); color: var(--neg-ink); border-color: rgb(var(--edge)); }
+.sl-badge .ico { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ============================================================
+   INPUT / LABEL / TEXTAREA / OTP
+   ============================================================ */
+.sl-label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
+.sl-input, .sl-textarea {
+  font-family: var(--mono); font-size: 0.82rem; color: var(--ink); width: 100%;
+  padding: 0.6rem 0.8rem; border-radius: var(--radius); border: var(--border-w) solid rgb(var(--edge));
+  background: linear-gradient(135deg, rgba(var(--glass-tint),0.1), rgba(var(--glass-tint),0.03));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); outline: none;
+}
+.sl-textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+.sl-input::placeholder, .sl-textarea::placeholder { color: var(--ink-dim); }
+.sl-input:focus, .sl-textarea:focus { box-shadow: 3px 3px 0 0 var(--accent), inset 0 1px 0 rgba(255,255,255,0.25); }
+.sl-otp { display: flex; gap: 0.5rem; }
+.sl-otp input { width: 42px; height: 48px; text-align: center; font-family: var(--mono); font-size: 1.1rem; font-weight: 700; color: var(--ink); border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); outline: none; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-otp input:focus { box-shadow: 2px 2px 0 0 var(--accent); }
+
+/* ============================================================
+   CHECKBOX / RADIO / SWITCH / TOGGLE
+   ============================================================ */
+.sl-check, .sl-radio-item { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; }
+.sl-box { width: 20px; height: 20px; flex: none; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); box-shadow: 2px 2px 0 0 var(--hard-shadow); display: grid; place-items: center; transition: background 0.15s; }
+.sl-check[aria-checked="true"] .sl-box { background: var(--accent); }
+.sl-box .tick { width: 11px; height: 11px; color: var(--accent-ink); opacity: 0; }
+.sl-check[aria-checked="true"] .sl-box .tick { opacity: 1; }
+.sl-radio { width: 20px; height: 20px; flex: none; border: var(--border-w) solid rgb(var(--edge)); border-radius: 50%; background: rgba(var(--glass-tint),0.06); box-shadow: 2px 2px 0 0 var(--hard-shadow); display: grid; place-items: center; }
+.sl-radio .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); opacity: 0; }
+.sl-radio-item[aria-checked="true"] .sl-radio .dot { opacity: 1; }
+.sl-switch { width: 46px; height: 26px; border-radius: var(--radius); border: var(--border-w) solid rgb(var(--edge)); position: relative; cursor: pointer; background: rgba(var(--glass-tint),0.1); box-shadow: 2px 2px 0 0 var(--hard-shadow); transition: background 0.2s; flex: none; }
+.sl-switch .knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: calc(var(--radius) * 0.6); background: rgb(var(--edge)); transition: transform 0.2s cubic-bezier(.3,1.4,.5,1); }
+.sl-switch[aria-checked="true"] { background: var(--accent); }
+.sl-switch[aria-checked="true"] .knob { transform: translateX(20px); background: var(--accent-ink); }
+.sl-toggle { font-family: var(--mono); font-size: 0.8rem; padding: 0.45rem 0.7rem; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); color: var(--ink-dim); cursor: pointer; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-toggle[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.sl-toggle-group { display: inline-flex; gap: 0; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); overflow: hidden; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-toggle-group button { font-family: var(--mono); font-size: 0.8rem; padding: 0.45rem 0.7rem; border: none; border-left: 1px solid rgba(var(--edge),0.3); background: rgba(var(--glass-tint),0.05); color: var(--ink-dim); cursor: pointer; display: grid; place-items: center; }
+.sl-toggle-group button:first-child { border-left: none; }
+.sl-toggle-group button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* ============================================================
+   SLIDER / PROGRESS
+   ============================================================ */
+.sl-slider { width: 100%; height: 26px; display: flex; align-items: center; }
+.sl-slider .trk { flex: 1; height: 8px; border-radius: var(--radius); border: 2px solid rgb(var(--edge)); position: relative; background: rgba(var(--glass-tint),0.06); cursor: pointer; }
+.sl-slider .fl { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); }
+.sl-slider .th { position: absolute; top: 50%; transform: translate(-50%,-50%); width: 18px; height: 18px; border-radius: var(--radius); background: rgb(var(--edge)); box-shadow: 2px 2px 0 var(--hard-shadow); }
+.sl-progress { width: 100%; height: 14px; border: 2px solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); }
+.sl-progress > span { display: block; height: 100%; background: var(--accent); background-image: linear-gradient(135deg, rgba(255,255,255,0.25) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.25) 75%, transparent 75%); background-size: 16px 16px; transition: width 0.4s; }
+
+/* ============================================================
+   SELECT / DROPDOWN / COMBOBOX / COMMAND
+   ============================================================ */
+.sl-pop-wrap { position: relative; }
+.sl-trigger {
+  font-family: var(--mono); font-size: 0.82rem; color: var(--ink); cursor: pointer;
+  padding: 0.55rem 0.8rem; border-radius: var(--radius); border: var(--border-w) solid rgb(var(--edge));
+  background: linear-gradient(135deg, rgba(var(--glass-tint),0.12), rgba(var(--glass-tint),0.04));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 2px 2px 0 0 var(--hard-shadow); display: inline-flex; align-items: center; justify-content: space-between; gap: 0.7rem; min-width: 160px;
+}
+.sl-trigger .chev { transition: transform 0.2s; color: var(--ink-dim); }
+.sl-trigger[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.sl-menu {
+  position: absolute; top: calc(100% + 8px); left: 0; min-width: 200px; z-index: 30;
+  border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius);
+  background: var(--bg-2);
+  backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: 6px 6px 0 0 var(--hard-shadow); padding: 0.35rem;
+  opacity: 0; transform: translateY(-6px) scale(0.98); transform-origin: top left; pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.sl-menu.open { opacity: 1; transform: none; pointer-events: auto; }
+/* each .glass cell is its own stacking context (backdrop-filter), so an open
+   menu would otherwise be painted under later sibling cells — lift the host */
+.kit-cell:has(.sl-menu.open),
+.kit-cell:has(.sl-trigger[aria-expanded="true"]),
+.kit-cell:has([data-pop][aria-expanded="true"]) { z-index: 40; }
+.sl-menu .item { font-family: var(--mono); font-size: 0.8rem; padding: 0.5rem 0.6rem; border-radius: calc(var(--radius) * 0.6); color: var(--ink); cursor: pointer; display: flex; align-items: center; gap: 0.55rem; }
+.sl-menu .item:hover, .sl-menu .item.active { background: var(--accent); color: var(--accent-ink); }
+.sl-menu .item .k { margin-left: auto; font-size: 0.7rem; opacity: 0.6; }
+.sl-menu .sep { height: 1px; background: rgba(var(--edge),0.2); margin: 0.3rem 0; }
+.sl-menu .lbl { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); padding: 0.4rem 0.6rem 0.2rem; }
+.sl-cmd-search { font-family: var(--mono); font-size: 0.8rem; color: var(--ink); width: 100%; padding: 0.5rem 0.6rem; border: none; border-bottom: 1.5px solid rgba(var(--edge),0.3); background: none; outline: none; margin-bottom: 0.3rem; }
+.sl-cmd-search::placeholder { color: var(--ink-dim); }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.sl-tabs .tablist { display: inline-flex; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); overflow: hidden; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-tabs .tablist button { font-family: var(--mono); font-size: 0.78rem; padding: 0.5rem 0.9rem; border: none; border-left: 1px solid rgba(var(--edge),0.3); background: rgba(var(--glass-tint),0.05); color: var(--ink-dim); cursor: pointer; }
+.sl-tabs .tablist button:first-child { border-left: none; }
+.sl-tabs .tablist button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.sl-tabs .panel { display: none; padding-top: 0.9rem; font-size: 0.88rem; color: var(--ink-dim); }
+.sl-tabs .panel.show { display: block; }
+
+/* ============================================================
+   ACCORDION
+   ============================================================ */
+.sl-acc-item { border-bottom: 1px solid rgba(var(--edge),0.18); }
+.sl-acc-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 0; cursor: pointer; font-weight: 700; font-size: 0.92rem; font-family: var(--display); }
+.sl-acc-head .pm { width: 16px; height: 16px; position: relative; flex: none; }
+.sl-acc-head .pm::before, .sl-acc-head .pm::after { content: ""; position: absolute; background: var(--accent); transition: transform 0.2s; }
+.sl-acc-head .pm::before { left: 0; right: 0; top: 7px; height: 2px; }
+.sl-acc-head .pm::after { top: 0; bottom: 0; left: 7px; width: 2px; }
+.sl-acc-item.open .pm::after { transform: scaleY(0); }
+.sl-acc-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.sl-acc-body > p { padding: 0 0 0.9rem; margin: 0; font-size: 0.85rem; color: var(--ink-dim); }
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
+.sl-ava { width: 40px; height: 40px; border-radius: var(--radius); border: var(--border-w) solid rgb(var(--edge)); overflow: hidden; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 0.85rem; box-shadow: 2px 2px 0 0 var(--hard-shadow); background: var(--accent); color: var(--accent-ink); flex: none; }
+.sl-ava img { width: 100%; height: 100%; object-fit: cover; }
+.sl-ava-group { display: flex; }
+.sl-ava-group .sl-ava { margin-left: -10px; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-ava-group .sl-ava:first-child { margin-left: 0; }
+
+/* ============================================================
+   ALERT
+   ============================================================ */
+.sl-alert { display: flex; gap: 0.8rem; padding: 0.9rem 1rem; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); border-left-width: 6px; background: rgba(var(--glass-tint),0.06); }
+.sl-alert.destructive { border-left-color: var(--neg); }
+.sl-alert .ai { flex: none; width: 20px; height: 20px; color: var(--accent); }
+.sl-alert.destructive .ai { color: var(--ink); }
+.sl-alert .at { font-weight: 700; font-size: 0.9rem; margin: 0 0 0.2rem; }
+.sl-alert .ad { font-size: 0.82rem; color: var(--ink-dim); margin: 0; }
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.sl-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.sl-table th { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); text-align: left; padding: 0.55rem 0.7rem; border-bottom: 2px solid rgb(var(--edge)); }
+.sl-table td { padding: 0.6rem 0.7rem; border-bottom: 1px solid rgba(var(--edge),0.15); }
+.sl-table tr:last-child td { border-bottom: none; }
+.sl-table tbody tr:hover { background: rgba(var(--glass-tint),0.05); }
+
+/* ============================================================
+   SKELETON
+   ============================================================ */
+.sl-skel { background: linear-gradient(90deg, rgba(var(--glass-tint),0.06) 25%, rgba(var(--glass-tint),0.16) 37%, rgba(var(--glass-tint),0.06) 63%); background-size: 400% 100%; animation: sl-shimmer 1.4s ease infinite; border-radius: var(--radius); border: 1px solid rgba(var(--edge),0.18); }
+@keyframes sl-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .sl-skel { animation: none; } }
+
+/* ============================================================
+   TOOLTIP / HOVER CARD
+   ============================================================ */
+.sl-tip-wrap { position: relative; display: inline-flex; }
+.sl-tip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px); white-space: nowrap; font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem 0.6rem; background: var(--bg-2); border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); box-shadow: 3px 3px 0 0 var(--hard-shadow); opacity: 0; pointer-events: none; transition: opacity 0.15s, transform 0.15s; z-index: 20; }
+.sl-tip-wrap:hover .sl-tip { opacity: 1; transform: translateX(-50%); }
+.sl-hover-card { position: absolute; top: calc(100% + 8px); left: 0; width: 240px; padding: 1rem; background: var(--bg-2); border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); box-shadow: 6px 6px 0 0 var(--hard-shadow); opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity 0.18s, transform 0.18s; z-index: 20; }
+.sl-tip-wrap:hover .sl-hover-card { opacity: 1; transform: none; }
+
+/* ============================================================
+   SEPARATOR
+   ============================================================ */
+.sl-sep { height: 2px; background: rgba(var(--edge),0.25); border: none; width: 100%; }
+.sl-sep.v { width: 2px; height: 28px; }
+
+/* ============================================================
+   BREADCRUMB / PAGINATION / MENUBAR
+   ============================================================ */
+.sl-crumb { display: flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.78rem; flex-wrap: wrap; }
+.sl-crumb a { color: var(--ink-dim); text-decoration: none; }
+.sl-crumb a:hover { color: var(--ink); }
+.sl-crumb .sl-cur { color: var(--accent); }
+.sl-crumb .sl-sl { color: var(--ink-dim); opacity: 0.5; }
+.sl-page { display: flex; gap: 0.4rem; }
+.sl-page button { width: 36px; height: 36px; font-family: var(--mono); font-size: 0.8rem; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); color: var(--ink); cursor: pointer; box-shadow: 2px 2px 0 0 var(--hard-shadow); }
+.sl-page button.cur { background: var(--accent); color: var(--accent-ink); }
+.sl-page button[disabled] { opacity: 0.35; pointer-events: none; }
+.sl-menubar { display: inline-flex; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); box-shadow: 2px 2px 0 0 var(--hard-shadow); overflow: hidden; }
+.sl-menubar > button { font-family: var(--mono); font-size: 0.78rem; padding: 0.45rem 0.8rem; border: none; border-left: 1px solid rgba(var(--edge),0.25); background: rgba(var(--glass-tint),0.05); color: var(--ink-dim); cursor: pointer; }
+.sl-menubar > button:first-child { border-left: none; }
+.sl-menubar > button:hover { background: var(--accent); color: var(--accent-ink); }
+
+/* ============================================================
+   CALENDAR / DATE
+   ============================================================ */
+.sl-cal { width: 100%; }
+.sl-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; font-family: var(--mono); font-size: 0.82rem; }
+.sl-cal-head button { width: 28px; height: 28px; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: rgba(var(--glass-tint),0.06); color: var(--ink); cursor: pointer; }
+.sl-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.sl-cal-grid .dow { font-family: var(--mono); font-size: 0.6rem; color: var(--ink-dim); text-align: center; padding-bottom: 0.3rem; text-transform: uppercase; }
+.sl-cal-grid .day { aspect-ratio: 1; display: grid; place-items: center; font-family: var(--mono); font-size: 0.74rem; border-radius: var(--radius); cursor: pointer; color: var(--ink); }
+.sl-cal-grid .day:hover { background: rgba(var(--glass-tint),0.12); }
+.sl-cal-grid .day.muted { color: var(--ink-dim); opacity: 0.4; }
+.sl-cal-grid .day.sel { background: var(--accent); color: var(--accent-ink); border: 2px solid rgb(var(--edge)); }
+
+/* ============================================================
+   ASPECT RATIO / CARD
+   ============================================================ */
+.sl-ratio { width: 100%; aspect-ratio: 16 / 9; border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 40%, transparent), rgba(var(--glass-tint),0.06)); display: grid; place-items: center; font-family: var(--mono); font-size: 0.68rem; color: var(--ink-dim); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); }
+.sl-card-demo { border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); box-shadow: 4px 4px 0 0 var(--hard-shadow); overflow: hidden; background: rgba(var(--glass-tint),0.05); }
+.sl-card-demo .cd-media { aspect-ratio: 16/8; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent), rgba(var(--glass-tint),0.1)); border-bottom: var(--border-w) solid rgb(var(--edge)); }
+.sl-card-demo .cd-body { padding: 0.9rem 1rem; }
+.sl-card-demo .cd-body h4 { margin: 0 0 0.3rem; font-size: 1rem; }
+.sl-card-demo .cd-body p { margin: 0 0 0.8rem; font-size: 0.82rem; color: var(--ink-dim); }
+
+/* ============================================================
+   OVERLAYS — dialog / sheet / popover backdrop
+   ============================================================ */
+.sl-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: grid; place-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.sl-overlay.open { opacity: 1; pointer-events: auto; }
+.sl-dialog { width: min(440px, 92vw); padding: 1.6rem; background: var(--bg-2); border: var(--border-w) solid rgb(var(--edge)); border-radius: var(--radius); box-shadow: 10px 10px 0 0 var(--hard-shadow); transform: translateY(10px) scale(0.97); transition: transform 0.22s cubic-bezier(.2,.9,.2,1); }
+.sl-overlay.open .sl-dialog { transform: none; }
+.sl-dialog h3 { font-size: 1.3rem; margin: 0 0 0.5rem; }
+.sl-dialog p { color: var(--ink-dim); font-size: 0.9rem; margin: 0 0 1.3rem; }
+.sl-dialog .actions { display: flex; gap: 0.7rem; justify-content: flex-end; }
+.sl-sheet-overlay { justify-items: end; place-items: stretch; }
+.sl-sheet { position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 90vw); padding: 1.6rem; background: var(--bg-2); border-left: var(--border-w) solid rgb(var(--edge)); box-shadow: -10px 0 0 0 rgba(0,0,0,0.2); transform: translateX(100%); transition: transform 0.28s cubic-bezier(.2,.9,.2,1); }
+.sl-sheet-overlay.open .sl-sheet { transform: none; }
+.sl-sheet h3 { margin: 0 0 0.4rem; font-size: 1.2rem; }
+.sl-sheet p { color: var(--ink-dim); font-size: 0.86rem; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.sl-toast-stack { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 300; width: 300px; height: 0; }
+.sl-toast {
+  position: absolute; bottom: 0; right: 0; width: 100%; box-sizing: border-box;
+  padding: 0.85rem 1rem; background: var(--bg-2);
+  border: var(--border-w) solid rgb(var(--edge)); border-left: 6px solid var(--accent);
+  border-radius: var(--radius); box-shadow: 5px 5px 0 0 var(--hard-shadow);
+  display: flex; gap: 0.7rem; align-items: flex-start;
+  --y: 0px; --s: 1;
+  transform: translateX(125%);
+  transform-origin: bottom right;
+  transition: transform 0.4s cubic-bezier(.2,.9,.2,1), opacity 0.3s ease;
+}
+.sl-toast.show { transform: translateY(var(--y)) scale(var(--s)); }
+.sl-toast .tt { font-weight: 700; font-size: 0.86rem; margin: 0 0 0.15rem; }
+.sl-toast .td { font-size: 0.78rem; color: var(--ink-dim); margin: 0; }
+
+/* ============================================================
+   SHOWCASE — real products built on the system
+   ============================================================ */
+.show-feature { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.4rem; padding: 1.4rem; align-items: center; }
+@media (max-width: 760px) { .show-feature { grid-template-columns: 1fr; } }
+.show-browser { border: var(--border-w) solid rgb(var(--edge)); box-shadow: 6px 6px 0 0 var(--hard-shadow); overflow: hidden; background: var(--bg-2); }
+.browser-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.7rem; border-bottom: var(--border-w) solid rgb(var(--edge)); background: rgba(var(--glass-tint),0.06); }
+.browser-bar .tl { width: 11px; height: 11px; border: 1.5px solid rgb(var(--edge)); background: rgba(var(--glass-tint),0.15); flex: none; }
+.browser-bar .url { margin-left: 0.6rem; font-family: var(--mono); font-size: 0.72rem; color: var(--ink-dim); padding: 0.2rem 0.7rem; border: 1.5px solid rgba(var(--edge),0.4); flex: 1; background: rgba(var(--glass-tint),0.04); }
+.browser-shot { display: block; width: 100%; aspect-ratio: 16 / 10; }
+.show-meta { display: flex; flex-direction: column; gap: 1rem; }
+.show-name { font-weight: 700; }

@@ -89,20 +89,52 @@ export const TAB_DESCRIPTIONS: Record<TabType, string> = {
   mcp: 'Configure MCP (Model Context Protocol) servers',
 };
 
+/*
+ * Which thematic group each tab renders under in the Control Panel (see
+ * SETTINGS_GROUPS below). Order here is just data — display order within a
+ * group still comes from each tab's `order` field.
+ */
+export type SettingsGroup = 'profile' | 'platform' | 'data';
+
+export const TAB_GROUPS: Record<TabType, SettingsGroup> = {
+  profile: 'profile',
+  settings: 'profile',
+  notifications: 'profile',
+  'cloud-providers': 'platform',
+  'local-providers': 'platform',
+  github: 'platform',
+  gitlab: 'platform',
+  netlify: 'platform',
+  vercel: 'platform',
+  supabase: 'platform',
+  mcp: 'platform',
+  data: 'data',
+  'event-logs': 'data',
+  features: 'data',
+};
+
+export const SETTINGS_GROUPS: { id: SettingsGroup; label: string; description: string }[] = [
+  { id: 'profile', label: 'Profile', description: 'Your account, preferences, and notifications' },
+  { id: 'platform', label: 'Platform', description: 'Model providers and connected integrations' },
+  { id: 'data', label: 'Data & Monitoring', description: 'Storage, system events, and upcoming features' },
+];
+
 export const DEFAULT_TAB_CONFIG = [
   // User Window Tabs (Always visible by default)
-  { id: 'features', visible: true, window: 'user' as const, order: 0 },
-  { id: 'data', visible: true, window: 'user' as const, order: 1 },
-  { id: 'cloud-providers', visible: true, window: 'user' as const, order: 2 },
-  { id: 'local-providers', visible: true, window: 'user' as const, order: 3 },
-  { id: 'github', visible: true, window: 'user' as const, order: 4 },
-  { id: 'gitlab', visible: true, window: 'user' as const, order: 5 },
-  { id: 'netlify', visible: true, window: 'user' as const, order: 6 },
-  { id: 'vercel', visible: true, window: 'user' as const, order: 7 },
-  { id: 'supabase', visible: true, window: 'user' as const, order: 8 },
-  { id: 'notifications', visible: true, window: 'user' as const, order: 9 },
-  { id: 'event-logs', visible: true, window: 'user' as const, order: 10 },
-  { id: 'mcp', visible: true, window: 'user' as const, order: 11 },
+  { id: 'profile', visible: true, window: 'user' as const, order: 0 },
+  { id: 'settings', visible: true, window: 'user' as const, order: 1 },
+  { id: 'notifications', visible: true, window: 'user' as const, order: 2 },
+  { id: 'cloud-providers', visible: true, window: 'user' as const, order: 3 },
+  { id: 'local-providers', visible: true, window: 'user' as const, order: 4 },
+  { id: 'github', visible: true, window: 'user' as const, order: 5 },
+  { id: 'gitlab', visible: true, window: 'user' as const, order: 6 },
+  { id: 'netlify', visible: true, window: 'user' as const, order: 7 },
+  { id: 'vercel', visible: true, window: 'user' as const, order: 8 },
+  { id: 'supabase', visible: true, window: 'user' as const, order: 9 },
+  { id: 'mcp', visible: true, window: 'user' as const, order: 10 },
+  { id: 'data', visible: true, window: 'user' as const, order: 11 },
+  { id: 'event-logs', visible: true, window: 'user' as const, order: 12 },
+  { id: 'features', visible: true, window: 'user' as const, order: 13 },
 
   // User Window Tabs (In dropdown, initially hidden)
 ];

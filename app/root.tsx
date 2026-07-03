@@ -1,7 +1,6 @@
 import { useStore } from '@nanostores/react';
 import type { LinksFunction } from '@remix-run/cloudflare';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
-import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
@@ -16,6 +15,7 @@ import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
+import './styles/tailwind.css';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -29,7 +29,6 @@ export const links: LinksFunction = () => [
     type: 'image/svg+xml',
   },
   { rel: 'stylesheet', href: reactToastifyStyles },
-  { rel: 'stylesheet', href: tailwindReset },
   { rel: 'stylesheet', href: globalStyles },
   { rel: 'stylesheet', href: xtermStyles },
   {
@@ -43,22 +42,19 @@ export const links: LinksFunction = () => [
   },
   {
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    href: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap',
   },
 ];
 
+/*
+ * Exobase is dark-mode only. `data-theme` drives the existing --bolt-elements-*
+ * variable blocks (variables.scss); the `dark` class is what Tailwind's
+ * `@custom-variant dark (&:is(.dark *))` (tailwind.css) keys off for shadcn
+ * components. Both are set unconditionally — there's no other theme to detect.
+ */
 const inlineThemeCode = stripIndents`
-  setTutorialKitTheme();
-
-  function setTutorialKitTheme() {
-    let theme = localStorage.getItem('bolt_theme');
-
-    if (!theme) {
-      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }
+  document.querySelector('html')?.setAttribute('data-theme', 'dark');
+  document.querySelector('html')?.classList.add('dark');
 `;
 
 export const Head = createHead(() => (
@@ -75,7 +71,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
+    const html = document.querySelector('html');
+    html?.setAttribute('data-theme', theme);
+    html?.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
   return (
