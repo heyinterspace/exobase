@@ -16,13 +16,14 @@ import Cookies from 'js-cookie';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import styles from './BaseChat.module.scss';
 import type { ProviderInfo } from '~/types/model';
-import type { ActionAlert, SupabaseAlert, DeployAlert, LlmErrorAlertType } from '~/types/actions';
+import type { ActionAlert, SupabaseAlert, LinearAlert, DeployAlert, LlmErrorAlertType } from '~/types/actions';
 import DeployChatAlert from '~/components/deploy/DeployAlert';
 import ChatAlert from './ChatAlert';
 import type { ModelInfo } from '~/lib/modules/llm/types';
 import ProgressCompilation from './ProgressCompilation';
 import type { ProgressAnnotation } from '~/types/context';
 import { SupabaseChatAlert } from '~/components/chat/SupabaseAlert';
+import { LinearChatAlert } from '~/components/chat/LinearAlert';
 import { expoUrlAtom } from '~/lib/stores/qrCodeStore';
 import { useStore } from '@nanostores/react';
 import { StickToBottom, useStickToBottomContext } from '~/lib/hooks';
@@ -62,6 +63,8 @@ interface BaseChatProps {
   clearAlert?: () => void;
   supabaseAlert?: SupabaseAlert;
   clearSupabaseAlert?: () => void;
+  linearAlert?: LinearAlert;
+  clearLinearAlert?: () => void;
   deployAlert?: DeployAlert;
   clearDeployAlert?: () => void;
   llmErrorAlert?: LlmErrorAlertType;
@@ -107,6 +110,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       clearDeployAlert,
       supabaseAlert,
       clearSupabaseAlert,
+      linearAlert,
+      clearLinearAlert,
       llmErrorAlert,
       clearLlmErrorAlert,
       data,
@@ -401,6 +406,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       postMessage={(message) => {
                         sendMessage?.({} as any, message);
                         clearSupabaseAlert?.();
+                      }}
+                    />
+                  )}
+                  {linearAlert && (
+                    <LinearChatAlert
+                      alert={linearAlert}
+                      clearAlert={() => clearLinearAlert?.()}
+                      postMessage={(message) => {
+                        sendMessage?.({} as any, message);
+                        clearLinearAlert?.();
                       }}
                     />
                   )}

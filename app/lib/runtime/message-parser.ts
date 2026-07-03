@@ -1,4 +1,12 @@
-import type { ActionType, BoltAction, BoltActionData, FileAction, ShellAction, SupabaseAction } from '~/types/actions';
+import type {
+  ActionType,
+  BoltAction,
+  BoltActionData,
+  FileAction,
+  ShellAction,
+  SupabaseAction,
+  LinearAction,
+} from '~/types/actions';
 import type { BoltArtifactData } from '~/types/artifact';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
@@ -364,6 +372,29 @@ export class StreamingMessageParser {
         }
 
         (actionAttributes as SupabaseAction).filePath = filePath;
+      }
+    } else if (actionType === 'linear') {
+      const operation = this.#extractAttribute(actionTag, 'operation');
+
+      if (operation !== 'create_issue') {
+        logger.warn(`Invalid or missing operation for Linear action: ${operation}`);
+        throw new Error(`Invalid Linear operation: ${operation}`);
+      }
+
+      const title = this.#extractAttribute(actionTag, 'title');
+
+      if (!title) {
+        logger.warn('Linear issue creation requires a title');
+        throw new Error('Linear issue creation requires a title');
+      }
+
+      (actionAttributes as LinearAction).operation = operation;
+      (actionAttributes as LinearAction).title = title;
+
+      const teamId = this.#extractAttribute(actionTag, 'teamId');
+
+      if (teamId) {
+        (actionAttributes as LinearAction).teamId = teamId;
       }
     } else if (actionType === 'file') {
       const filePath = this.#extractAttribute(actionTag, 'filePath') as string;

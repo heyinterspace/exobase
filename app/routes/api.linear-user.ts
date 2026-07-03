@@ -1,38 +1,8 @@
 import { json } from '@remix-run/cloudflare';
-import { getApiKeysFromCookie } from '~/lib/api/cookies';
-import { getLinearTokenFromNango } from '~/lib/api/nango.server';
+import { resolveLinearToken, type ResolvedLinearToken } from '~/lib/api/nango.server';
 import { withSecurity } from '~/lib/security';
 
-interface ResolvedToken {
-  token: string;
-
-  /**
-   * OAuth2 tokens (via Nango) need "Bearer "; Linear personal API keys are
-   * sent as-is.
-   */
-  isOAuth: boolean;
-}
-
-async function resolveLinearToken(cookieHeader: string | null, context: any): Promise<ResolvedToken | null> {
-  const oauthToken = await getLinearTokenFromNango(cookieHeader, context);
-
-  if (oauthToken) {
-    return { token: oauthToken, isOAuth: true };
-  }
-
-  const apiKeys = getApiKeysFromCookie(cookieHeader);
-  const personalKey =
-    apiKeys.LINEAR_API_KEY ||
-    apiKeys.VITE_LINEAR_API_KEY ||
-    context?.cloudflare?.env?.LINEAR_API_KEY ||
-    context?.cloudflare?.env?.VITE_LINEAR_API_KEY ||
-    process.env.LINEAR_API_KEY ||
-    process.env.VITE_LINEAR_API_KEY;
-
-  return personalKey ? { token: personalKey, isOAuth: false } : null;
-}
-
-async function linearGraphQL(resolved: ResolvedToken, query: string) {
+async function linearGraphQL(resolved: ResolvedLinearToken, query: string) {
   const response = await fetch('https://api.linear.app/graphql', {
     method: 'POST',
     headers: {

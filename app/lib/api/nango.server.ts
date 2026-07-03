@@ -1,5 +1,5 @@
 import { Nango } from '@nangohq/node';
-import { parseCookies } from './cookies';
+import { parseCookies, getApiKeysFromCookie } from './cookies';
 
 /**
  * Resolves the Nango secret key the same way other server-only secrets are
@@ -58,4 +58,36 @@ export function getGitHubTokenFromNango(cookieHeader: string | null, context: an
 
 export function getLinearTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
   return getTokenFromNango(cookieHeader, context, 'linear', 'linearNangoConnectionId');
+}
+
+export interface ResolvedLinearToken {
+  token: string;
+
+  /**
+   * OAuth2 tokens (via Nango) need "Bearer "; Linear personal API keys are
+   * sent as-is. Shared by api.linear-user.ts and api.linear-issue.ts.
+   */
+  isOAuth: boolean;
+}
+
+export async function resolveLinearToken(
+  cookieHeader: string | null,
+  context: any,
+): Promise<ResolvedLinearToken | null> {
+  const oauthToken = await getLinearTokenFromNango(cookieHeader, context);
+
+  if (oauthToken) {
+    return { token: oauthToken, isOAuth: true };
+  }
+
+  const apiKeys = getApiKeysFromCookie(cookieHeader);
+  const personalKey =
+    apiKeys.LINEAR_API_KEY ||
+    apiKeys.VITE_LINEAR_API_KEY ||
+    context?.cloudflare?.env?.LINEAR_API_KEY ||
+    context?.cloudflare?.env?.VITE_LINEAR_API_KEY ||
+    process.env.LINEAR_API_KEY ||
+    process.env.VITE_LINEAR_API_KEY;
+
+  return personalKey ? { token: personalKey, isOAuth: false } : null;
 }
