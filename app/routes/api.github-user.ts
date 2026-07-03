@@ -1,5 +1,6 @@
 import { json } from '@remix-run/cloudflare';
 import { getApiKeysFromCookie } from '~/lib/api/cookies';
+import { getGitHubTokenFromNango } from '~/lib/api/nango.server';
 import { withSecurity } from '~/lib/security';
 
 async function githubUserLoader({ request, context }: { request: Request; context: any }) {
@@ -8,8 +9,12 @@ async function githubUserLoader({ request, context }: { request: Request; contex
     const cookieHeader = request.headers.get('Cookie');
     const apiKeys = getApiKeysFromCookie(cookieHeader);
 
-    // Try to get GitHub token from various sources
+    /*
+     * Try to get GitHub token from various sources — a live Nango-connected
+     * OAuth token takes priority over a manually-pasted PAT, if both exist.
+     */
     const githubToken =
+      (await getGitHubTokenFromNango(cookieHeader, context)) ||
       apiKeys.GITHUB_API_KEY ||
       apiKeys.VITE_GITHUB_ACCESS_TOKEN ||
       context?.cloudflare?.env?.GITHUB_TOKEN ||
@@ -98,8 +103,12 @@ async function githubUserAction({ request, context }: { request: Request; contex
     const cookieHeader = request.headers.get('Cookie');
     const apiKeys = getApiKeysFromCookie(cookieHeader);
 
-    // Try to get GitHub token from various sources
+    /*
+     * Try to get GitHub token from various sources — a live Nango-connected
+     * OAuth token takes priority over a manually-pasted PAT, if both exist.
+     */
     const githubToken =
+      (await getGitHubTokenFromNango(cookieHeader, context)) ||
       apiKeys.GITHUB_API_KEY ||
       apiKeys.VITE_GITHUB_ACCESS_TOKEN ||
       context?.cloudflare?.env?.GITHUB_TOKEN ||
