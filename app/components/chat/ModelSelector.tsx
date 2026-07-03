@@ -506,11 +506,11 @@ export const ModelSelector = ({
 
       {isProviderDropdownOpen && (
         <div
-          className="absolute z-20 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor glass shadow-lg"
+          className="absolute z-20 w-full mt-1 py-1 border border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 shadow-hard-lg max-h-[min(24rem,calc(100vh-8rem))] flex flex-col"
           role="listbox"
           id="provider-listbox"
         >
-          <div className="px-2 pb-2">
+          <div className="px-2 pb-2 shrink-0">
             <div className="relative">
               <input
                 ref={providerSearchInputRef}
@@ -550,7 +550,7 @@ export const ModelSelector = ({
 
           <div
             className={classNames(
-              'max-h-60 overflow-y-auto',
+              'flex-1 min-h-0 overflow-y-auto',
               'sm:scrollbar-none',
               '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2',
               '[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor',
@@ -680,11 +680,15 @@ export const ModelSelector = ({
 
         {isModelDropdownOpen && (
           <div
-            className="absolute z-10 w-80 bottom-full left-0 mb-1 py-1 border border-bolt-elements-borderColor glass shadow-hard-lg"
+            className={classNames(
+              'absolute z-10 w-80 bottom-full left-0 mb-1 py-1 flex flex-col',
+              'max-h-[min(28rem,calc(100vh-8rem))]',
+              'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 shadow-hard-lg',
+            )}
             role="listbox"
             id="model-listbox"
           >
-            <div className="px-2 pb-2 space-y-2">
+            <div className="px-2 pb-2 space-y-2 shrink-0">
               {/* Provider — which BYO key/endpoint this model list comes from */}
               <div
                 className="relative flex border-b border-bolt-elements-borderColor pb-2"
@@ -811,7 +815,7 @@ export const ModelSelector = ({
 
             <div
               className={classNames(
-                'max-h-60 overflow-y-auto',
+                'flex-1 min-h-0 overflow-y-auto',
                 'sm:scrollbar-none',
                 '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2',
                 '[&::-webkit-scrollbar-thumb]:bg-bolt-elements-borderColor',

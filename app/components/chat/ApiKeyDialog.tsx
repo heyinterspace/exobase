@@ -73,9 +73,11 @@ export function ApiKeyDialog({ open, onClose, provider, apiKey, setApiKey }: Api
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <DialogClose asChild>
-                <DialogButton type="secondary">Cancel</DialogButton>
+                <DialogButton type="secondary" icon="i-ph:x">
+                  Cancel
+                </DialogButton>
               </DialogClose>
-              <DialogButton type="primary" onClick={handleSave} disabled={!tempKey}>
+              <DialogButton type="primary" icon="i-ph:check" onClick={handleSave} disabled={!tempKey}>
                 Save &amp; continue
               </DialogButton>
             </div>

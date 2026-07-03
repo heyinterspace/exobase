@@ -240,7 +240,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 'flex flex-col overflow-hidden',
                 'relative',
                 'transform transition-all duration-200 ease-out',
-                open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4',
+                open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[6vw]',
               )}
             >
               <div className="relative z-10 flex flex-col h-full">
@@ -250,7 +250,11 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {(activeTab || showTabManagement) && (
                       <button
                         onClick={handleBack}
-                        className="flex items-center justify-center w-8 h-8 bg-transparent hover:bg-accent/10 group transition-colors duration-150"
+                        className={classNames(
+                          'flex items-center justify-center w-8 h-8 shrink-0',
+                          'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2',
+                          'hover:border-accent group transition-theme',
+                        )}
                       >
                         <div className="i-ph:arrow-left w-4 h-4 text-bolt-elements-textSecondary group-hover:text-accent transition-colors" />
                       </button>
@@ -269,70 +273,83 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {/* Close Button */}
                     <button
                       onClick={handleClose}
-                      className="flex items-center justify-center w-8 h-8 bg-transparent hover:bg-accent/10 group transition-all duration-200"
+                      className={classNames(
+                        'flex items-center justify-center w-8 h-8 shrink-0',
+                        'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2',
+                        'hover:border-accent group transition-theme',
+                      )}
                     >
                       <div className="i-ph:x w-4 h-4 text-bolt-elements-textSecondary group-hover:text-accent transition-colors" />
                     </button>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div
-                  className={classNames(
-                    'flex-1',
-                    'overflow-y-auto',
-                    'hover:overflow-y-auto',
-                    'scrollbar scrollbar-w-2',
-                    'scrollbar-track-transparent',
-                    'scrollbar-thumb-bolt-elements-borderColor',
-                    'will-change-scroll',
-                    'touch-auto',
-                  )}
-                >
+                {/*
+                 * Content — two stacked layers, not a single view that swaps in place.
+                 * The tab grid is layer 0 and always stays mounted; opening a tab slides
+                 * layer 1 in from the right on top of it, and layer 0 recedes (scales
+                 * down, dims) behind it rather than disappearing, so the panel reads as
+                 * one layer landing on another instead of a flat content swap.
+                 */}
+                <div className="flex-1 relative overflow-hidden">
                   <div
                     className={classNames(
-                      'p-6 transition-opacity duration-150',
-                      activeTab || showTabManagement ? 'opacity-100' : 'opacity-100',
+                      'absolute inset-0 overflow-y-auto',
+                      'scrollbar scrollbar-w-2 scrollbar-track-transparent scrollbar-thumb-bolt-elements-borderColor',
+                      'will-change-scroll touch-auto',
+                      'transition-all duration-200 ease-out origin-top',
+                      activeTab || showTabManagement ? 'scale-95 opacity-40 pointer-events-none' : '',
                     )}
                   >
-                    {activeTab ? (
-                      getTabComponent(activeTab)
-                    ) : (
-                      <div className="flex flex-col gap-6">
-                        {SETTINGS_GROUPS.map((group) => {
-                          const tabsInGroup = visibleTabs.filter((tab) => TAB_GROUPS[tab.id as TabType] === group.id);
+                    <div className="p-6 flex flex-col gap-6">
+                      {SETTINGS_GROUPS.map((group) => {
+                        const tabsInGroup = visibleTabs.filter((tab) => TAB_GROUPS[tab.id as TabType] === group.id);
 
-                          if (tabsInGroup.length === 0) {
-                            return null;
-                          }
+                        if (tabsInGroup.length === 0) {
+                          return null;
+                        }
 
-                          return (
-                            <div key={group.id}>
-                              <h2 className="font-display text-sm font-semibold text-bolt-elements-textPrimary mb-2">
-                                {group.label}
-                              </h2>
-                              <div className="border border-bolt-elements-borderColor divide-y divide-bolt-elements-borderColor">
-                                {tabsInGroup.map((tab) => (
-                                  <TabTile
-                                    key={tab.id}
-                                    tab={tab}
-                                    onClick={() => handleTabClick(tab.id as TabType)}
-                                    isActive={activeTab === tab.id}
-                                    hasUpdate={getTabUpdateStatus(tab.id)}
-                                    statusMessage={getStatusMessage(tab.id)}
-                                    description={TAB_DESCRIPTIONS[tab.id]}
-                                    isLoading={loadingTab === tab.id}
-                                  >
-                                    {BETA_TABS.has(tab.id) && <BetaLabel />}
-                                  </TabTile>
-                                ))}
-                              </div>
+                        return (
+                          <div key={group.id}>
+                            <h2 className="font-display text-sm font-semibold text-bolt-elements-textPrimary mb-2">
+                              {group.label}
+                            </h2>
+                            <div className="border border-bolt-elements-borderColor divide-y divide-bolt-elements-borderColor">
+                              {tabsInGroup.map((tab) => (
+                                <TabTile
+                                  key={tab.id}
+                                  tab={tab}
+                                  onClick={() => handleTabClick(tab.id as TabType)}
+                                  isActive={activeTab === tab.id}
+                                  hasUpdate={getTabUpdateStatus(tab.id)}
+                                  statusMessage={getStatusMessage(tab.id)}
+                                  description={TAB_DESCRIPTIONS[tab.id]}
+                                  isLoading={loadingTab === tab.id}
+                                >
+                                  {BETA_TABS.has(tab.id) && <BetaLabel />}
+                                </TabTile>
+                              ))}
                             </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {(activeTab || showTabManagement) && (
+                    <div
+                      key={activeTab || 'tab-management'}
+                      className={classNames(
+                        'animated fadeInRight',
+                        'absolute inset-0 overflow-y-auto',
+                        'scrollbar scrollbar-w-2 scrollbar-track-transparent scrollbar-thumb-bolt-elements-borderColor',
+                        'will-change-scroll touch-auto',
+                        'bg-bolt-elements-background-depth-1 border-l border-bolt-elements-borderColor shadow-hard-lg',
+                      )}
+                    >
+                      <div className="p-6">{activeTab && getTabComponent(activeTab)}</div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

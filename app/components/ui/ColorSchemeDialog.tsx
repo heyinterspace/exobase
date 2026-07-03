@@ -68,7 +68,7 @@ export const ColorSchemeDialog: React.FC<ColorSchemeDialogProps> = ({ setDesignS
         </h3>
         <button
           onClick={handleReset}
-          className="text-sm bg-transparent hover:bg-bolt-elements-bg-depth-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary rounded-lg flex items-center gap-2 transition-all duration-200"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium border border-bolt-elements-borderColor shadow-hard press-hard bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:border-accent hover:text-accent transition-theme"
         >
           <span className="i-ph:arrow-clockwise text-sm" />
           Reset

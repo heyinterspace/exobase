@@ -4,7 +4,6 @@ import React, { memo, type ReactNode, useState, useEffect } from 'react';
 import { classNames } from '~/utils/classNames';
 import { cubicEasingFn } from '~/utils/easings';
 import { IconButton } from './IconButton';
-import { Button } from './Button';
 import { FixedSizeList } from 'react-window';
 import { Checkbox } from './Checkbox';
 import { Label } from './Label';
@@ -13,25 +12,37 @@ export { Close as DialogClose, Root as DialogRoot } from '@radix-ui/react-dialog
 
 interface DialogButtonProps {
   type: 'primary' | 'secondary' | 'danger';
+  icon?: string;
   children: ReactNode;
   onClick?: (event: React.MouseEvent) => void;
   disabled?: boolean;
+
+  /** Set only when this button is the submit action of a surrounding <form>. */
+  submit?: boolean;
 }
 
-export const DialogButton = memo(({ type, children, onClick, disabled }: DialogButtonProps) => {
+/**
+ * Every dialog action is icon + label in a bordered button — never bare text,
+ * matching the composer toolbar's Attach/Remix/Voice/Launch convention.
+ */
+export const DialogButton = memo(({ type, icon, children, onClick, disabled, submit }: DialogButtonProps) => {
   return (
     <button
+      type={submit ? 'submit' : 'button'}
       className={classNames(
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors',
+        'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium shrink-0',
+        'border border-bolt-elements-borderColor shadow-hard press-hard transition-theme',
+        'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard',
         type === 'primary'
-          ? 'bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-500 dark:hover:bg-purple-600'
+          ? 'bg-accent text-accent-ink hover:brightness-110'
           : type === 'secondary'
-            ? 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-            : 'bg-transparent text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10',
+            ? 'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:border-accent hover:text-accent'
+            : 'bg-bolt-elements-background-depth-2 text-red-400 hover:border-red-400',
       )}
       onClick={onClick}
       disabled={disabled}
     >
+      {icon && <div className={classNames(icon, 'text-sm')} />}
       {children}
     </button>
   );
@@ -75,18 +86,21 @@ export const dialogBackdropVariants = {
   },
 } satisfies Variants;
 
+/**
+ * Panels are layers that travel over the screen, not pop-ups that
+ * materialize in place — every dialog slides in from off-screen right and
+ * settles centered, rather than scaling up from nothing.
+ */
 export const dialogVariants = {
   closed: {
-    x: '-50%',
-    y: '-40%',
-    scale: 0.96,
+    x: 'calc(-50% + 15vw)',
+    y: '-50%',
     opacity: 0,
     transition,
   },
   open: {
     x: '-50%',
     y: '-50%',
-    scale: 1,
     opacity: 1,
     transition,
   },
@@ -116,7 +130,7 @@ export const Dialog = memo(({ children, className, showCloseButton = true, onClo
       <RadixDialog.Content asChild>
         <motion.div
           className={classNames(
-            'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-950 rounded-lg shadow-xl border border-bolt-elements-borderColor z-[9999] w-[520px] focus:outline-none',
+            'fixed top-1/2 left-1/2 glass border border-bolt-elements-borderColor shadow-hard-lg z-[9999] w-[520px] focus:outline-none',
             className,
           )}
           initial="closed"
@@ -130,7 +144,7 @@ export const Dialog = memo(({ children, className, showCloseButton = true, onClo
               <RadixDialog.Close asChild onClick={onClose}>
                 <IconButton
                   icon="i-ph:x"
-                  className="absolute top-3 right-3 text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary"
+                  className="absolute top-3 right-3 border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:border-accent hover:text-accent"
                 />
               </RadixDialog.Close>
             )}
@@ -208,32 +222,23 @@ export function ConfirmationDialog({
   return (
     <RadixDialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog showCloseButton={false}>
-        <div className="p-6 bg-white dark:bg-gray-950 relative z-10">
+        <div className="p-6 relative z-10">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="mb-4">{description}</DialogDescription>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose} disabled={isLoading}>
+          <div className="flex justify-end gap-2">
+            <DialogButton type="secondary" icon="i-ph:x" onClick={onClose} disabled={isLoading}>
               {cancelLabel}
-            </Button>
-            <Button
-              variant={variant}
+            </DialogButton>
+            <DialogButton
+              type={variant === 'destructive' ? 'danger' : 'primary'}
+              icon={
+                isLoading ? 'i-svg-spinners:90-ring-with-bg' : variant === 'destructive' ? 'i-ph:trash' : 'i-ph:check'
+              }
               onClick={onConfirm}
               disabled={isLoading}
-              className={
-                variant === 'destructive'
-                  ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent hover:bg-bolt-elements-button-primary-backgroundHover'
-              }
             >
-              {isLoading ? (
-                <>
-                  <div className="i-ph-spinner-gap-bold animate-spin w-4 h-4 mr-2" />
-                  {confirmLabel}
-                </>
-              ) : (
-                confirmLabel
-              )}
-            </Button>
+              {confirmLabel}
+            </DialogButton>
           </div>
         </div>
       </Dialog>
@@ -382,7 +387,7 @@ export function SelectionDialog({
   return (
     <RadixDialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog showCloseButton={false}>
-        <div className="p-6 bg-white dark:bg-gray-950 relative z-10">
+        <div className="p-6 relative z-10">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="mt-2 mb-4">
             Select the items you want to include and click{' '}
@@ -394,14 +399,13 @@ export function SelectionDialog({
               <span className="text-sm font-medium text-bolt-elements-textSecondary">
                 {selectedItems.length} of {items.length} selected
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
+              <DialogButton
+                type="secondary"
+                icon={selectAll ? 'i-ph:x-square' : 'i-ph:check-square'}
                 onClick={handleSelectAll}
-                className="text-xs h-8 px-2 text-bolt-elements-textPrimary hover:text-bolt-elements-item-contentAccent hover:bg-bolt-elements-item-backgroundAccent bg-bolt-elements-bg-depth-2 dark:bg-transparent"
               >
                 {selectAll ? 'Deselect All' : 'Select All'}
-              </Button>
+              </DialogButton>
             </div>
 
             <div
@@ -427,20 +431,17 @@ export function SelectionDialog({
           </div>
 
           <div className="flex justify-between mt-6">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-bolt-elements-borderColor text-bolt-elements-textPrimary hover:bg-bolt-elements-item-backgroundActive"
-            >
+            <DialogButton type="secondary" icon="i-ph:x" onClick={onClose}>
               Cancel
-            </Button>
-            <Button
+            </DialogButton>
+            <DialogButton
+              type="primary"
+              icon="i-ph:check"
               onClick={handleConfirm}
               disabled={selectedItems.length === 0}
-              className="bg-accent-500 text-white hover:bg-accent-600 disabled:opacity-50 disabled:pointer-events-none"
             >
               {confirmLabel}
-            </Button>
+            </DialogButton>
           </div>
         </div>
       </Dialog>
