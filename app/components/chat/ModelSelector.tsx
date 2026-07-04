@@ -681,7 +681,7 @@ export const ModelSelector = ({
         {isModelDropdownOpen && (
           <div
             className={classNames(
-              'absolute z-10 w-80 bottom-full left-0 mb-1 py-1 flex flex-col',
+              'absolute z-10 w-80 max-w-[calc(100vw-2rem)] bottom-full right-0 mb-1 py-1 flex flex-col',
               'max-h-[min(28rem,calc(100vh-8rem))]',
               'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-3 shadow-hard-lg',
             )}
