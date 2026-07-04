@@ -229,7 +229,33 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
       </div>
 
       <div className="flex justify-between items-center text-sm pt-2 gap-2">
-        <div className="flex gap-1 items-center flex-wrap">
+        <div className="flex gap-1.5 items-center flex-wrap">
+          <button
+            type="button"
+            title="Attach a file"
+            onClick={() => props.handleFileUpload()}
+            className={classNames(
+              'flex items-center justify-center p-1.5 shrink-0',
+              'border border-bolt-elements-borderColor shadow-hard-sm press-hard-sm',
+              'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary',
+              'hover:border-accent hover:text-accent',
+              'transition-theme',
+            )}
+          >
+            <div className="i-ph:paperclip text-sm" />
+          </button>
+          <GitCloneButton iconOnly importChat={props.importChat} />
+          <SpeechRecognitionButton
+            isListening={props.isListening}
+            onStart={props.startListening}
+            onStop={props.stopListening}
+            disabled={props.isStreaming}
+          />
+          {/* Mounted headlessly so the in-chat "Connect to Supabase" alert can still open this dialog */}
+          <SupabaseConnection hideTrigger />
+        </div>
+
+        <div className="flex gap-1.5 items-center shrink-0">
           <ClientOnly>
             {() => (
               <ModelSelector
@@ -245,65 +271,36 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
               />
             )}
           </ClientOnly>
+
           <button
             type="button"
-            title="Attach a file"
-            onClick={() => props.handleFileUpload()}
+            title={props.isStreaming ? 'Stop' : 'Launch'}
+            onClick={(event) => {
+              if (props.isStreaming) {
+                props.handleStop?.();
+                return;
+              }
+
+              if (canSubmit) {
+                guardedSend(event);
+              }
+            }}
+            disabled={!canSubmit && !props.isStreaming}
             className={classNames(
-              'flex items-center gap-1 px-2 py-1.5 shrink-0',
+              'flex items-center justify-center p-2 shrink-0',
               'border border-bolt-elements-borderColor shadow-hard-sm press-hard-sm',
-              'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary',
-              'hover:border-accent hover:text-accent',
-              'text-xs font-medium transition-theme',
+              'bg-accent text-accent-ink hover:brightness-110',
+              'transition-[filter]',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard-sm',
             )}
           >
-            <div className="i-ph:paperclip text-sm" />
-            Attach
-          </button>
-          <GitCloneButton iconOnly importChat={props.importChat} />
-          <SpeechRecognitionButton
-            isListening={props.isListening}
-            onStart={props.startListening}
-            onStop={props.stopListening}
-            disabled={props.isStreaming}
-          />
-          {/* Mounted headlessly so the in-chat "Connect to Supabase" alert can still open this dialog */}
-          <SupabaseConnection hideTrigger />
-        </div>
-
-        <button
-          type="button"
-          onClick={(event) => {
-            if (props.isStreaming) {
-              props.handleStop?.();
-              return;
-            }
-
-            if (canSubmit) {
-              guardedSend(event);
-            }
-          }}
-          disabled={!canSubmit && !props.isStreaming}
-          className={classNames(
-            'flex items-center gap-1.5 px-3 py-1.5 shrink-0',
-            'border border-bolt-elements-borderColor shadow-hard-sm press-hard-sm',
-            'bg-accent text-accent-ink hover:brightness-110',
-            'text-xs font-semibold transition-[filter]',
-            'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard-sm',
-          )}
-        >
-          {props.isStreaming ? (
-            <>
+            {props.isStreaming ? (
               <div className="i-ph:stop-circle-bold w-4 h-4" />
-              Stop
-            </>
-          ) : (
-            <>
+            ) : (
               <div className="i-ph:rocket-launch-fill w-4 h-4" />
-              Launch
-            </>
-          )}
-        </button>
+            )}
+          </button>
+        </div>
       </div>
 
       <ExpoQrModal open={props.qrModalOpen} onClose={() => props.setQrModalOpen(false)} />

@@ -19,17 +19,16 @@ export const SpeechRecognitionButton = ({
       disabled={disabled}
       onClick={isListening ? onStop : onStart}
       className={classNames(
-        'flex items-center gap-1 px-2 py-1.5 shrink-0',
+        'flex items-center justify-center p-1.5 shrink-0',
         'border border-bolt-elements-borderColor shadow-hard-sm press-hard-sm',
         'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary',
         'hover:border-accent hover:text-accent',
-        'text-xs font-medium transition-theme',
+        'transition-theme',
         'disabled:opacity-30 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard-sm',
         { 'border-accent text-accent': isListening },
       )}
     >
       {isListening ? <div className="i-ph:microphone-slash text-sm" /> : <div className="i-ph:microphone text-sm" />}
-      Voice
     </button>
   );
 };
