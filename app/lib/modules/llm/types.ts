@@ -22,6 +22,14 @@ export interface ModelInfo {
     promptPerMillion: number;
     completionPerMillion: number;
   };
+
+  /**
+   * Neutral third-party quality score, 0-100 — OpenRouter's `intelligence_index`
+   * from Artificial Analysis (independent model benchmarker, not affiliated with
+   * any vendor). Only populated where OpenRouter's API actually returns it —
+   * roughly a quarter of listed models, generally the well-known ones.
+   */
+  qualityScore?: number;
 }
 
 export interface ProviderInfo {

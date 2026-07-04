@@ -12,6 +12,11 @@ interface OpenRouterModel {
     prompt: number;
     completion: number;
   };
+  benchmarks?: {
+    artificial_analysis?: {
+      intelligence_index?: number;
+    };
+  };
 }
 
 interface OpenRouterModelsResponse {
@@ -80,6 +85,7 @@ export default class OpenRouterProvider extends BaseProvider {
               promptPerMillion: m.pricing.prompt * 1_000_000,
               completionPerMillion: m.pricing.completion * 1_000_000,
             },
+            qualityScore: m.benchmarks?.artificial_analysis?.intelligence_index,
           };
         });
     } catch (error) {

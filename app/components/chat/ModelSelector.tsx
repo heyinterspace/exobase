@@ -93,21 +93,6 @@ interface ModelSelectorProps {
   modelLoading?: string;
 }
 
-// Helper function to determine if a model is likely free
-const isModelLikelyFree = (model: ModelInfo): boolean => {
-  // Models with real $0 pricing data (OpenRouter)
-  if (model.pricing && model.pricing.promptPerMillion === 0 && model.pricing.completionPerMillion === 0) {
-    return true;
-  }
-
-  // Models with "free" in the name or label
-  if (model.name.toLowerCase().includes('free') || model.label.toLowerCase().includes('free')) {
-    return true;
-  }
-
-  return false;
-};
-
 export const ModelSelector = ({
   model,
   setModel,
@@ -131,7 +116,6 @@ export const ModelSelector = ({
   const providerSearchInputRef = useRef<HTMLInputElement>(null);
   const providerOptionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const providerDropdownRef = useRef<HTMLDivElement>(null);
-  const [showFreeModelsOnly, setShowFreeModelsOnly] = useState(false);
 
   /*
    * Replit-style composer: the model picker is the one visible control; provider
@@ -205,14 +189,6 @@ export const ModelSelector = ({
     const baseModels = [...modelList].filter((e) => e.provider === provider?.name && e.name);
 
     return baseModels
-      .filter((model) => {
-        // Apply free models filter
-        if (showFreeModelsOnly && !isModelLikelyFree(model)) {
-          return false;
-        }
-
-        return true;
-      })
       .map((model) => {
         // Calculate search scores for fuzzy matching
         const labelMatch = fuzzyMatch(debouncedModelSearchQuery, model.label);
@@ -239,7 +215,7 @@ export const ModelSelector = ({
 
         return a.label.localeCompare(b.label);
       });
-  }, [modelList, provider?.name, showFreeModelsOnly, debouncedModelSearchQuery]);
+  }, [modelList, provider?.name, debouncedModelSearchQuery]);
 
   // Best price/performance among flagship-tier models — recomputed as pricing/availability changes.
   const recommendedModelName = useMemo(() => getRecommendedModel(modelList)?.name, [modelList]);
@@ -263,14 +239,9 @@ export const ModelSelector = ({
       .sort((a, b) => b.searchScore - a.searchScore);
   }, [providerList, debouncedProviderSearchQuery]);
 
-  // Reset free models filter when provider changes
-  useEffect(() => {
-    setShowFreeModelsOnly(false);
-  }, [provider?.name]);
-
   useEffect(() => {
     setFocusedModelIndex(-1);
-  }, [debouncedModelSearchQuery, isModelDropdownOpen, showFreeModelsOnly]);
+  }, [debouncedModelSearchQuery, isModelDropdownOpen]);
 
   useEffect(() => {
     setFocusedProviderIndex(-1);
@@ -707,7 +678,11 @@ export const ModelSelector = ({
                       e.stopPropagation();
                       setIsProviderPickerExpanded(true);
                     }}
-                    className="flex items-center gap-1.5 text-xs text-bolt-elements-textTertiary hover:text-bolt-elements-textSecondary transition-colors"
+                    className={classNames(
+                      'inline-flex items-center gap-1.5 px-2 py-1 text-xs',
+                      'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2',
+                      'text-bolt-elements-textSecondary hover:border-accent hover:text-accent transition-theme',
+                    )}
                   >
                     {provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
                       <span
@@ -763,40 +738,12 @@ export const ModelSelector = ({
               >
                 <span className="flex items-center gap-1.5">
                   <span className="i-ph:shuffle-fill text-accent text-sm" />
-                  <span className="text-sm text-bolt-elements-textPrimary">Smart Routing</span>
+                  <span className="text-sm text-bolt-elements-textPrimary">Smart</span>
                 </span>
                 <span className="px-1 py-px text-[9px] font-mono font-medium border border-bolt-elements-borderColor text-bolt-elements-textTertiary shrink-0">
-                  Coming soon
+                  SOON
                 </span>
               </button>
-
-              {/* Free Models Filter Toggle - Only show for OpenRouter */}
-              {provider?.name === 'OpenRouter' && (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowFreeModelsOnly(!showFreeModelsOnly);
-                    }}
-                    className={classNames(
-                      'flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all',
-                      'hover:bg-bolt-elements-background-depth-3',
-                      showFreeModelsOnly
-                        ? 'bg-accent/20 text-accent border border-accent'
-                        : 'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary border border-bolt-elements-borderColor',
-                    )}
-                  >
-                    <span className="i-ph:gift text-xs" />
-                    Free models only
-                  </button>
-                  {showFreeModelsOnly && (
-                    <span className="text-xs text-bolt-elements-textTertiary">
-                      {filteredModels.length} free model{filteredModels.length !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                </div>
-              )}
 
               {/* Search Result Count */}
               {debouncedModelSearchQuery && filteredModels.length > 0 && (
@@ -871,12 +818,10 @@ export const ModelSelector = ({
                 <div className="px-3 py-3 text-sm">
                   <div className="text-bolt-elements-textTertiary mb-1">
                     {debouncedModelSearchQuery
-                      ? `No models match "${debouncedModelSearchQuery}"${showFreeModelsOnly ? ' (free only)' : ''}`
-                      : showFreeModelsOnly
-                        ? 'No free models available'
-                        : provider?.name && LOCAL_PROVIDERS.includes(provider.name)
-                          ? `No models found — is ${provider.name} running?`
-                          : 'No models available'}
+                      ? `No models match "${debouncedModelSearchQuery}"`
+                      : provider?.name && LOCAL_PROVIDERS.includes(provider.name)
+                        ? `No models found — is ${provider.name} running?`
+                        : 'No models available'}
                   </div>
                   {!debouncedModelSearchQuery && provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
                     <div className="text-xs text-bolt-elements-textTertiary mt-1">
@@ -888,11 +833,6 @@ export const ModelSelector = ({
                   {debouncedModelSearchQuery && (
                     <div className="text-xs text-bolt-elements-textTertiary">
                       Try searching for model names, context sizes (e.g., "128k", "1M"), or capabilities
-                    </div>
-                  )}
-                  {showFreeModelsOnly && !debouncedModelSearchQuery && (
-                    <div className="text-xs text-bolt-elements-textTertiary">
-                      Try disabling the "Free models only" filter to see all available models
                     </div>
                   )}
                 </div>
@@ -933,16 +873,27 @@ export const ModelSelector = ({
                           {modelOption.name === recommendedModelName && (
                             <span
                               className="shrink-0 px-1 py-px text-[9px] font-mono font-medium border border-accent bg-accent/10 text-accent"
-                              title="Best price/performance among well-known models, right now"
+                              title="Cheapest model that clears our quality bar on Artificial Analysis's independent benchmark"
                             >
                               Recommended
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-bolt-elements-textTertiary">
-                            {formatContextSize(modelOption.maxTokenAllowed)} tokens
+                          <span
+                            className="text-xs text-bolt-elements-textTertiary"
+                            title="Context window — how much conversation and file content the model can consider at once"
+                          >
+                            {formatContextSize(modelOption.maxTokenAllowed)} context
                           </span>
+                          {modelOption.qualityScore != null && (
+                            <span
+                              className="text-xs text-bolt-elements-textTertiary"
+                              title="Independent quality score, 0-100 (Artificial Analysis intelligence index)"
+                            >
+                              Score {modelOption.qualityScore.toFixed(0)}
+                            </span>
+                          )}
                           {modelOption.pricing && (
                             <span
                               className="flex items-center gap-1 text-xs text-bolt-elements-textTertiary"
@@ -967,9 +918,6 @@ export const ModelSelector = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-1 ml-2">
-                        {isModelLikelyFree(modelOption) && (
-                          <span className="i-ph:gift text-xs text-bolt-elements-textTertiary" title="Free model" />
-                        )}
                         {model === modelOption.name && (
                           <span className="i-ph:check text-xs text-green-500" title="Selected" />
                         )}

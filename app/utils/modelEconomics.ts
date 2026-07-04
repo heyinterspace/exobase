@@ -1,51 +1,12 @@
 import type { ModelInfo } from '~/lib/modules/llm/types';
 
 /**
- * Hand-maintained substrings identifying well-known, generally-capable model
- * families — used only to narrow the "recommended" pick to models people would
- * actually reach for, not just whatever is cheapest overall (which is usually a
- * niche/low-quality model). Loose substring match, not exact IDs, so it survives
- * minor version bumps (e.g. "claude-3.5-sonnet" still matches "-20241022" suffixed
- * IDs) — but new model families still need to be added here manually over time.
+ * Judgment call, not a standard: comfortably above the median score across
+ * scored models (~26 out of 100 at last check), meant to capture genuinely
+ * capable models rather than "the best we happened to have data for."
+ * Revisit if OpenRouter's score distribution shifts meaningfully.
  */
-const FLAGSHIP_FAMILIES = [
-  'claude-3.5-sonnet',
-  'claude-3.7-sonnet',
-  'claude-sonnet-4',
-  'claude-opus-4',
-  'claude-3-opus',
-  'gpt-4o',
-  'gpt-4.1',
-  'gpt-4-turbo',
-  'openai/o1',
-  'openai/o3',
-  'gemini-1.5-pro',
-  'gemini-2.0-pro',
-  'gemini-2.5-pro',
-  'gemini-2.0-flash',
-  'gemini-2.5-flash',
-  'llama-3.1-405b',
-  'llama-3.3-70b',
-  'deepseek-v3',
-  'deepseek-r1',
-  'grok-2',
-  'grok-3',
-  'mistral-large',
-];
-
-export function isFlagshipModel(model: ModelInfo): boolean {
-  const name = model.name.toLowerCase();
-
-  /*
-   * Exclude free-tier variants — usually rate-limited/lower-priority, not a great
-   * default recommendation even though they're technically the cheapest option.
-   */
-  if (name.includes(':free')) {
-    return false;
-  }
-
-  return FLAGSHIP_FAMILIES.some((family) => name.includes(family));
-}
+const MIN_QUALITY_SCORE = 45;
 
 export function blendedPricePerMillion(model: ModelInfo): number | undefined {
   if (!model.pricing) {
@@ -56,13 +17,21 @@ export function blendedPricePerMillion(model: ModelInfo): number | undefined {
 }
 
 /**
- * Best price/performance among models we'd actually recommend — cheapest
- * blended price among the flagship-family models currently available, not
- * cheapest overall. Recomputed from whatever's in modelList, so it moves with
- * OpenRouter's live pricing rather than naming one fixed model forever.
+ * Cheapest model that clears a quality bar, using OpenRouter's `intelligence_index`
+ * (from Artificial Analysis, an independent benchmarker) as the neutral score —
+ * not cheapest overall, which is usually a free or low-quality model. Recomputed
+ * from whatever's in modelList, so it moves with live pricing/scores rather than
+ * naming one model forever. Free-tier (":free") variants are excluded even if
+ * they'd otherwise win on price — they're usually rate-limited/lower-priority.
  */
 export function getRecommendedModel(modelList: ModelInfo[]): ModelInfo | undefined {
-  const candidates = modelList.filter((m) => m.provider === 'OpenRouter' && m.pricing && isFlagshipModel(m));
+  const candidates = modelList.filter(
+    (m) =>
+      m.provider === 'OpenRouter' &&
+      m.pricing &&
+      !m.name.toLowerCase().includes(':free') &&
+      (m.qualityScore ?? 0) >= MIN_QUALITY_SCORE,
+  );
 
   if (candidates.length === 0) {
     return undefined;
