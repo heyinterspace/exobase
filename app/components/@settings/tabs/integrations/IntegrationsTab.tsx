@@ -1,13 +1,12 @@
 import { classNames } from '~/utils/classNames';
 import GitHubTab from '~/components/@settings/tabs/github/GitHubTab';
 import LinearTab from '~/components/@settings/tabs/linear/LinearTab';
-import CloudProvidersTab from '~/components/@settings/tabs/providers/cloud/CloudProvidersTab';
-import LocalProvidersTab from '~/components/@settings/tabs/providers/local/LocalProvidersTab';
-import McpTab from '~/components/@settings/tabs/mcp/McpTab';
 
 /*
- * One category per piece of the eng stack, one or two best-in-class
- * providers each — not broad, shallow coverage. See project memory
+ * Only providers with a real one-click connect flow live here — no menu
+ * items for integrations we haven't actually built yet. Build up from
+ * first principles: GitHub and Linear today, more added only once each
+ * has its own one-click interface. See project memory
  * `project_integration_philosophy`.
  */
 function Category({ label, children }: { label: string; children: React.ReactNode }) {
@@ -32,21 +31,6 @@ export default function IntegrationsTab() {
 
       <Category label="Issue tracking">
         <LinearTab />
-      </Category>
-
-      <div className="border-t border-bolt-elements-borderColor" />
-
-      <Category label="AI models">
-        <div className="space-y-8">
-          <CloudProvidersTab />
-          <LocalProvidersTab />
-        </div>
-      </Category>
-
-      <div className="border-t border-bolt-elements-borderColor" />
-
-      <Category label="Developer tools">
-        <McpTab />
       </Category>
     </div>
   );

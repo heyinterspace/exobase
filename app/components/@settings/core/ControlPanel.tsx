@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import * as RadixDialog from '@radix-ui/react-dialog';
+import { motion, type Variants } from 'framer-motion';
+import { cubicEasingFn } from '~/utils/easings';
 import { classNames } from '~/utils/classNames';
 import { TabTile } from '~/components/@settings/shared/components/TabTile';
 import { useFeatures } from '~/lib/hooks/useFeatures';
@@ -20,6 +22,23 @@ interface ControlPanelProps {
   open: boolean;
   onClose: () => void;
 }
+
+const transition = { duration: 0.2, ease: cubicEasingFn };
+
+/**
+ * Settings is a layer that travels over the app, not a pop-up that
+ * materializes in place — it slides in from off-screen right and settles
+ * centered, matching the shared Dialog component's convention.
+ */
+const backdropVariants = {
+  closed: { opacity: 0, transition },
+  open: { opacity: 1, transition },
+} satisfies Variants;
+
+const panelVariants = {
+  closed: { x: '6vw', opacity: 0, transition },
+  open: { x: 0, opacity: 1, transition },
+} satisfies Variants;
 
 export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
   // State
@@ -146,24 +165,35 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
     <RadixDialog.Root open={open}>
       <RadixDialog.Portal>
         <div className="fixed inset-0 flex items-center justify-center z-[100] modern-scrollbar">
-          <RadixDialog.Overlay className="absolute inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-sm transition-opacity duration-200" />
+          <RadixDialog.Overlay asChild>
+            <motion.div
+              className="absolute inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-sm"
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={backdropVariants}
+            />
+          </RadixDialog.Overlay>
 
           <RadixDialog.Content
             aria-describedby={undefined}
             onEscapeKeyDown={handleClose}
             onPointerDownOutside={handleClose}
             className="relative z-[101]"
+            asChild
           >
-            <div
+            <motion.div
               className={classNames(
                 'w-[95vw] max-w-[1200px] h-[85vh] max-h-[900px]',
                 'glass',
                 'border border-bolt-elements-borderColor shadow-hard-lg',
                 'flex flex-col overflow-hidden',
                 'relative',
-                'transform transition-all duration-200 ease-out',
-                open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[6vw]',
               )}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={panelVariants}
             >
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
@@ -257,7 +287,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </RadixDialog.Content>
         </div>
       </RadixDialog.Portal>
