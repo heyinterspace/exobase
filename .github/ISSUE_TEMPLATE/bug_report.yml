@@ -53,8 +53,8 @@ body:
     attributes:
       label: Platform
       value: |
-        - OS: [e.g. macOS, Windows, Linux]
-        - Browser: [e.g. Chrome, Safari, Firefox]
+        - OS: [e.g. macOS 15, iOS 18]
+        - Browser: [e.g. Safari, Chrome]
         - Version: [e.g. 91.1]
   - type: input
     id: provider

@@ -93,8 +93,8 @@ Let's get you up and running with the stable version of Bolt.DIY!
 
 [![Download Latest Release](https://img.shields.io/github/v/release/stackblitz-labs/bolt.diy?label=Download%20Bolt&sort=semver)](https://github.com/stackblitz-labs/bolt.diy/releases/latest) ← Click here to go to the latest release version!
 
-- Download the binary for your platform (available for Windows, macOS, and Linux)
-- **Note**: For macOS, if you get the error "This app is damaged", run:
+- Download the macOS build
+- **Note**: If you get the error "This app is damaged", run:
   ```bash
   xattr -cr /path/to/Bolt.app
   ```
@@ -110,18 +110,12 @@ Node.js is required to run the application.
 2. Download the "LTS" (Long Term Support) version for your operating system
 3. Run the installer, accepting the default settings
 4. Verify Node.js is properly installed:
-   - **For Windows Users**:
-     1. Press `Windows + R`
-     2. Type "sysdm.cpl" and press Enter
-     3. Go to "Advanced" tab → "Environment Variables"
-     4. Check if `Node.js` appears in the "Path" variable
-   - **For Mac/Linux Users**:
-     1. Open Terminal
-     2. Type this command:
-        ```bash
-        echo $PATH
-        ```
-     3. Look for `/usr/local/bin` in the output
+   1. Open Terminal
+   2. Type this command:
+      ```bash
+      echo $PATH
+      ```
+   3. Look for `/usr/local/bin` in the output
 
 ## Running the Application
 
@@ -197,14 +191,11 @@ This option requires Docker and is great when you want an isolated environment o
 
 ### Option 3: Desktop Application (Electron)
 
-For users who prefer a native desktop experience, bolt.diy is also available as an Electron desktop application:
+For users who prefer a native desktop experience, Exobase is also available as a macOS desktop application (Exobase is Mac/iOS only — Windows and Linux aren't supported):
 
 1. **Download the Desktop App**:
-   - Visit the [latest release](https://github.com/stackblitz-labs/bolt.diy/releases/latest)
-   - Download the appropriate binary for your operating system
-   - For macOS: Extract and run the `.dmg` file
-   - For Windows: Run the `.exe` installer
-   - For Linux: Extract and run the AppImage or install the `.deb` package
+   - Visit the [latest release](https://github.com/heyinterspace/exobase/releases/latest)
+   - Download the `.dmg` file and extract/run it
 
 2. **Alternative**: Build from Source:
    ```bash
@@ -212,11 +203,7 @@ For users who prefer a native desktop experience, bolt.diy is also available as 
    pnpm install
 
    # Build the Electron app
-   pnpm electron:build:dist  # For all platforms
-   # OR platform-specific:
-   pnpm electron:build:mac   # macOS
-   pnpm electron:build:win   # Windows
-   pnpm electron:build:linux # Linux
+   pnpm electron:build:mac
    ```
 
 The desktop app provides the same full functionality as the web version with additional native features.
@@ -306,7 +293,7 @@ LMSTUDIO_BASE_URL=http://127.0.0.1:1234
 #### Search & Navigation
 - **Fuzzy Search**: Type-ahead search across all providers and models
 - **Keyboard Navigation**: Use arrow keys and Enter to navigate quickly
-- **Clear Search**: Press `Cmd+K` (Mac) or `Ctrl+K` (Windows/Linux) to clear search
+- **Clear Search**: Press `Cmd+K` to clear search
 
 ### Troubleshooting
 
@@ -480,10 +467,7 @@ Remember to always commit your local changes or stash them before pulling update
   - **`pnpm electron:build:preload`**: Builds the Electron preload script.
   - **`pnpm electron:build:renderer`**: Builds the Electron renderer.
   - **`pnpm electron:build:unpack`**: Creates an unpacked Electron build.
-  - **`pnpm electron:build:mac`**: Builds for macOS.
-  - **`pnpm electron:build:win`**: Builds for Windows.
-  - **`pnpm electron:build:linux`**: Builds for Linux.
-  - **`pnpm electron:build:dist`**: Builds for all platforms.
+  - **`pnpm electron:build:mac`**: Builds for macOS (the only supported desktop platform).
 
 ---
 
