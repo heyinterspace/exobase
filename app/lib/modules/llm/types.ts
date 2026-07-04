@@ -24,10 +24,12 @@ export interface ModelInfo {
   };
 
   /**
-   * Neutral third-party quality score, 0-100 — OpenRouter's `intelligence_index`
-   * from Artificial Analysis (independent model benchmarker, not affiliated with
-   * any vendor). Only populated where OpenRouter's API actually returns it —
-   * roughly a quarter of listed models, generally the well-known ones.
+   * Neutral third-party quality score, 0-100 — OpenRouter's `coding_index` from
+   * Artificial Analysis (independent model benchmarker, not affiliated with any
+   * vendor), i.e. a coding-specific score rather than general intelligence,
+   * since Exobase is a coding tool. Only populated where OpenRouter's API
+   * actually returns it — roughly a quarter of listed models, generally the
+   * well-known ones.
    */
   qualityScore?: number;
 }

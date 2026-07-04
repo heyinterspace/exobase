@@ -4,7 +4,7 @@ import type { KeyboardEvent } from 'react';
 import type { ModelInfo } from '~/lib/modules/llm/types';
 import { classNames } from '~/utils/classNames';
 import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
-import { getRecommendedModel, blendedPricePerMillion, getCostTier } from '~/utils/modelEconomics';
+import { getRecommendedModel, getTopModels, blendedPricePerMillion, getCostTier } from '~/utils/modelEconomics';
 import { parseModelLabel } from '~/utils/modelLabel';
 import { toast } from 'react-toastify';
 
@@ -222,35 +222,12 @@ export const ModelSelector = ({
     }
 
     /*
-     * No query: rank by how good a fit each model is for the task (quality score,
-     * highest first; models without a score sort last, by label), then cap to the
-     * best 2 — the recommended pick plus the single highest-scoring alternative.
-     * Anything else is one search away.
+     * No query: the best 10 models for the task, ranked by independent coding
+     * benchmark score (highest first). Everything else is one search away —
+     * the "+N more" row below points people at the full catalog.
      */
-    const ranked = searched.sort((a, b) => {
-      const scoreDiff = (b.qualityScore ?? -1) - (a.qualityScore ?? -1);
-
-      if (scoreDiff !== 0) {
-        return scoreDiff;
-      }
-
-      return a.label.localeCompare(b.label);
-    });
-
-    const recommended = ranked.find((m) => m.name === recommendedModelName);
-    const bestOverall = ranked.find((m) => m.qualityScore != null);
-    const topTwo = [recommended, bestOverall].filter((m): m is (typeof ranked)[number] => Boolean(m));
-    const deduped = topTwo.filter((m, i) => topTwo.findIndex((x) => x.name === m.name) === i);
-
-    if (deduped.length >= 2 || ranked.length <= 2) {
-      return deduped.length > 0 ? deduped : ranked.slice(0, 2);
-    }
-
-    // Not enough scored models to fill both slots — fill the rest from the ranked list.
-    const remaining = ranked.filter((m) => !deduped.some((d) => d.name === m.name));
-
-    return [...deduped, ...remaining].slice(0, 2);
-  }, [allModelsForProvider, debouncedModelSearchQuery, recommendedModelName]);
+    return getTopModels(searched);
+  }, [allModelsForProvider, debouncedModelSearchQuery]);
 
   const filteredProviders = useMemo(() => {
     if (!debouncedProviderSearchQuery) {
@@ -676,7 +653,19 @@ export const ModelSelector = ({
           tabIndex={0}
         >
           <div className="flex items-center gap-1.5">
-            <div className="truncate">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
+            <div className="truncate">
+              {(() => {
+                const current = modelList.find((m) => m.name === model);
+
+                if (!current) {
+                  return 'Select model';
+                }
+
+                const parsed = parseModelLabel(current.label);
+
+                return parsed.version ? `${parsed.modelName} ${parsed.version}` : parsed.modelName;
+              })()}
+            </div>
             <div
               className={classNames(
                 'i-ph:caret-down w-3 h-3 text-bolt-elements-textSecondary opacity-75 shrink-0',
@@ -785,12 +774,18 @@ export const ModelSelector = ({
                 </div>
               )}
 
-              {/* Default view is capped to the best 2 — explain the escape hatch */}
+              {/* Default view is capped to the top 10 — explain the escape hatch */}
               {!debouncedModelSearchQuery && allModelsForProvider.length > filteredModels.length && (
-                <div className="text-xs text-bolt-elements-textTertiary px-1">
-                  Showing the best {filteredModels.length} of {allModelsForProvider.length} — search by name for
-                  anything else
-                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    modelSearchInputRef.current?.focus();
+                  }}
+                  className="w-full text-left text-xs text-bolt-elements-textTertiary hover:text-accent transition-theme px-1"
+                >
+                  +{allModelsForProvider.length - filteredModels.length} more on {provider?.name} — search by name
+                </button>
               )}
 
               {/* Search Input */}
@@ -947,7 +942,7 @@ export const ModelSelector = ({
                           {modelOption.qualityScore != null && (
                             <span
                               className="text-xs text-bolt-elements-textTertiary"
-                              title="Independent quality score, 0-100 (Artificial Analysis intelligence index)"
+                              title="Independent coding benchmark score, 0-100 (Artificial Analysis coding index)"
                             >
                               Score {modelOption.qualityScore.toFixed(0)}
                             </span>

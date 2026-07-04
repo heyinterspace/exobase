@@ -1,12 +1,16 @@
 import type { ModelInfo } from '~/lib/modules/llm/types';
 
 /**
- * Judgment call, not a standard: comfortably above the median score across
- * scored models (~26 out of 100 at last check), meant to capture genuinely
- * capable models rather than "the best we happened to have data for."
- * Revisit if OpenRouter's score distribution shifts meaningfully.
+ * Judgment call, not a standard: comfortably above the median coding_index
+ * across scored models (~35 out of 100 at last check, range roughly 3-76),
+ * meant to capture models that are genuinely strong at coding rather than
+ * "the best we happened to have data for." Revisit if OpenRouter's score
+ * distribution shifts meaningfully.
  */
-const MIN_QUALITY_SCORE = 45;
+const MIN_QUALITY_SCORE = 55;
+
+/** Default size of the curated "best for the task" list shown before search. */
+export const TOP_MODELS_LIMIT = 10;
 
 export function blendedPricePerMillion(model: ModelInfo): number | undefined {
   if (!model.pricing) {
@@ -17,7 +21,22 @@ export function blendedPricePerMillion(model: ModelInfo): number | undefined {
 }
 
 /**
- * Cheapest model that clears a quality bar, using OpenRouter's `intelligence_index`
+ * Highest qualityScore first; models without a score (every non-OpenRouter
+ * provider, plus the ~75% of OpenRouter models Artificial Analysis hasn't
+ * scored) sort last, in their original order — a reasonable stand-in for
+ * "well, we don't know, so leave them where the provider put them."
+ */
+export function sortByQuality(models: ModelInfo[]): ModelInfo[] {
+  return [...models].sort((a, b) => (b.qualityScore ?? -1) - (a.qualityScore ?? -1));
+}
+
+/** Top N models for the task by quality score, for the default (unsearched) list. */
+export function getTopModels(models: ModelInfo[], limit: number = TOP_MODELS_LIMIT): ModelInfo[] {
+  return sortByQuality(models).slice(0, limit);
+}
+
+/**
+ * Cheapest model that clears a quality bar, using OpenRouter's `coding_index`
  * (from Artificial Analysis, an independent benchmarker) as the neutral score —
  * not cheapest overall, which is usually a free or low-quality model. Recomputed
  * from whatever's in modelList, so it moves with live pricing/scores rather than
