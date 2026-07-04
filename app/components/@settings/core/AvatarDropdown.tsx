@@ -89,22 +89,6 @@ export const AvatarDropdown = ({ onSelectTab }: AvatarDropdownProps) => {
             Edit Profile
           </DropdownMenu.Item>
 
-          <DropdownMenu.Item
-            className={classNames(
-              'flex items-center gap-2 px-4 py-2.5',
-              'text-sm text-bolt-elements-textPrimary',
-              'hover:bg-accent/10',
-              'hover:text-accent',
-              'cursor-pointer transition-all duration-200',
-              'outline-none',
-              'group',
-            )}
-            onClick={() => onSelectTab('settings')}
-          >
-            <div className="i-ph:gear-six w-4 h-4 text-bolt-elements-textTertiary group-hover:text-accent transition-colors" />
-            Settings
-          </DropdownMenu.Item>
-
           <div className="my-1 border-t border-bolt-elements-borderColor" />
 
           <DropdownMenu.Item
