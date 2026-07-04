@@ -5,6 +5,7 @@ import type { ModelInfo } from '~/lib/modules/llm/types';
 import { classNames } from '~/utils/classNames';
 import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
 import { getRecommendedModel, blendedPricePerMillion, getCostTier } from '~/utils/modelEconomics';
+import { parseModelLabel } from '~/utils/modelLabel';
 import { toast } from 'react-toastify';
 
 // Fuzzy search utilities
@@ -185,10 +186,19 @@ export const ModelSelector = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredModels = useMemo(() => {
-    const baseModels = [...modelList].filter((e) => e.provider === provider?.name && e.name);
+  /*
+   * Best price/performance, recomputed as pricing/scores change. Not scoped to
+   * the currently-selected provider — only ever matches an OpenRouter model.
+   */
+  const recommendedModelName = useMemo(() => getRecommendedModel(modelList)?.name, [modelList]);
 
-    return baseModels
+  const allModelsForProvider = useMemo(
+    () => [...modelList].filter((e) => e.provider === provider?.name && e.name),
+    [modelList, provider?.name],
+  );
+
+  const filteredModels = useMemo(() => {
+    const searched = allModelsForProvider
       .map((model) => {
         // Calculate search scores for fuzzy matching
         const labelMatch = fuzzyMatch(debouncedModelSearchQuery, model.label);
@@ -202,23 +212,45 @@ export const ModelSelector = ({
           ...model,
           searchScore: bestScore,
           searchMatches: matches,
-          highlightedLabel: highlightText(model.label, debouncedModelSearchQuery),
-          highlightedName: highlightText(model.name, debouncedModelSearchQuery),
         };
       })
-      .filter((model) => model.searchMatches)
-      .sort((a, b) => {
-        // Sort by search score (highest first), then by label
-        if (debouncedModelSearchQuery) {
-          return b.searchScore - a.searchScore;
-        }
+      .filter((model) => model.searchMatches);
 
-        return a.label.localeCompare(b.label);
-      });
-  }, [modelList, provider?.name, debouncedModelSearchQuery]);
+    if (debouncedModelSearchQuery) {
+      // Typing a name is the escape hatch to the full catalog — no cap, best matches first.
+      return searched.sort((a, b) => b.searchScore - a.searchScore);
+    }
 
-  // Best price/performance among flagship-tier models — recomputed as pricing/availability changes.
-  const recommendedModelName = useMemo(() => getRecommendedModel(modelList)?.name, [modelList]);
+    /*
+     * No query: rank by how good a fit each model is for the task (quality score,
+     * highest first; models without a score sort last, by label), then cap to the
+     * best 2 — the recommended pick plus the single highest-scoring alternative.
+     * Anything else is one search away.
+     */
+    const ranked = searched.sort((a, b) => {
+      const scoreDiff = (b.qualityScore ?? -1) - (a.qualityScore ?? -1);
+
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
+
+      return a.label.localeCompare(b.label);
+    });
+
+    const recommended = ranked.find((m) => m.name === recommendedModelName);
+    const bestOverall = ranked.find((m) => m.qualityScore != null);
+    const topTwo = [recommended, bestOverall].filter((m): m is (typeof ranked)[number] => Boolean(m));
+    const deduped = topTwo.filter((m, i) => topTwo.findIndex((x) => x.name === m.name) === i);
+
+    if (deduped.length >= 2 || ranked.length <= 2) {
+      return deduped.length > 0 ? deduped : ranked.slice(0, 2);
+    }
+
+    // Not enough scored models to fill both slots — fill the rest from the ranked list.
+    const remaining = ranked.filter((m) => !deduped.some((d) => d.name === m.name));
+
+    return [...deduped, ...remaining].slice(0, 2);
+  }, [allModelsForProvider, debouncedModelSearchQuery, recommendedModelName]);
 
   const filteredProviders = useMemo(() => {
     if (!debouncedProviderSearchQuery) {
@@ -753,6 +785,14 @@ export const ModelSelector = ({
                 </div>
               )}
 
+              {/* Default view is capped to the best 2 — explain the escape hatch */}
+              {!debouncedModelSearchQuery && allModelsForProvider.length > filteredModels.length && (
+                <div className="text-xs text-bolt-elements-textTertiary px-1">
+                  Showing the best {filteredModels.length} of {allModelsForProvider.length} — search by name for
+                  anything else
+                </div>
+              )}
+
               {/* Search Input */}
               <div className="relative">
                 <input
@@ -864,12 +904,30 @@ export const ModelSelector = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span
-                            dangerouslySetInnerHTML={{
-                              __html: (modelOption as any).highlightedLabel || modelOption.label,
-                            }}
-                          />
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {(() => {
+                            const parsed = parseModelLabel(modelOption.label);
+                            return (
+                              <>
+                                {parsed.company && (
+                                  <span className="shrink-0 px-1 py-px text-[9px] font-mono uppercase tracking-wide border border-bolt-elements-borderColor text-bolt-elements-textTertiary">
+                                    {parsed.company}
+                                  </span>
+                                )}
+                                <span className="font-medium truncate">{parsed.modelName}</span>
+                                {parsed.version && (
+                                  <span className="shrink-0 px-1 py-px text-[10px] font-mono border border-bolt-elements-borderColor text-bolt-elements-textSecondary">
+                                    {parsed.version}
+                                  </span>
+                                )}
+                                {parsed.versionDetail && (
+                                  <span className="shrink-0 text-xs text-bolt-elements-textTertiary">
+                                    {parsed.versionDetail}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                           {modelOption.name === recommendedModelName && (
                             <span
                               className="shrink-0 px-1 py-px text-[9px] font-mono font-medium border border-accent bg-accent/10 text-accent"
