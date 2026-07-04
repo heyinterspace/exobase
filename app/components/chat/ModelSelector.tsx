@@ -909,14 +909,16 @@ export const ModelSelector = ({
                                     {parsed.company}
                                   </span>
                                 )}
-                                <span className="font-medium truncate">{parsed.modelName}</span>
+                                <span className="shrink-0 max-w-[140px] truncate px-1 py-px text-[10px] font-mono font-medium border border-bolt-elements-borderColor text-bolt-elements-textPrimary">
+                                  {parsed.modelName}
+                                </span>
                                 {parsed.version && (
                                   <span className="shrink-0 px-1 py-px text-[10px] font-mono border border-bolt-elements-borderColor text-bolt-elements-textSecondary">
                                     {parsed.version}
                                   </span>
                                 )}
                                 {parsed.versionDetail && (
-                                  <span className="shrink-0 text-xs text-bolt-elements-textTertiary">
+                                  <span className="shrink-0 px-1 py-px text-[9px] font-mono border border-bolt-elements-borderColor text-bolt-elements-textTertiary">
                                     {parsed.versionDetail}
                                   </span>
                                 )}

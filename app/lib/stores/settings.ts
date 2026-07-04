@@ -324,7 +324,13 @@ const getInitialTabConfiguration = (): TabWindowConfig => {
   }
 
   try {
-    const saved = localStorage.getItem('bolt_tab_configuration');
+    /*
+     * Versioned key: bumping it invalidates stale saved configs (e.g. from
+     * before GitLab/Netlify/Vercel/Supabase/MCP/Local Providers were hidden
+     * pending a real one-click rebuild) so the new defaults actually apply
+     * instead of being silently overridden by whatever was saved before.
+     */
+    const saved = localStorage.getItem('bolt_tab_configuration_v2');
 
     if (!saved) {
       return defaultConfig;
@@ -357,7 +363,7 @@ export const resetTabConfiguration = () => {
   };
 
   tabConfigurationStore.set(defaultConfig);
-  localStorage.setItem('bolt_tab_configuration', JSON.stringify(defaultConfig));
+  localStorage.setItem('bolt_tab_configuration_v2', JSON.stringify(defaultConfig));
 };
 
 // First, let's define the SettingsStore interface
