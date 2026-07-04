@@ -648,8 +648,8 @@ export const ModelSelector = ({
       <div className="relative inline-flex" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
         <div
           className={classNames(
-            'max-w-[180px] px-2.5 py-1.5 border border-bolt-elements-borderColor shadow-hard',
-            'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary text-xs',
+            'max-w-[180px] px-2.5 py-1.5 border border-bolt-elements-borderColor shadow-hard-sm',
+            'bg-bolt-elements-background-depth-3 text-bolt-elements-textPrimary text-xs',
             'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
             'transition-all cursor-pointer',
             isModelDropdownOpen ? 'ring-2 ring-bolt-elements-focus' : undefined,

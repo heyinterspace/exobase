@@ -8,12 +8,14 @@ export const SettingsButton = memo(({ onClick }: SettingsButtonProps) => {
   return (
     <IconButton
       onClick={onClick}
-      icon="i-ph:gear"
       size="xl"
       title="Settings"
       data-testid="settings-button"
-      className="text-[#666] hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-item-backgroundActive/10 transition-colors"
-    />
+      className="gap-1.5 px-2 text-[#666] hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-item-backgroundActive/10 transition-colors"
+    >
+      <div className="i-ph:gear text-xl" />
+      <span className="text-sm font-medium">Settings</span>
+    </IconButton>
   );
 });
 

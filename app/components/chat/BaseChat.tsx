@@ -8,6 +8,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import PlanetSilhouette from '~/components/ui/PlanetSilhouette';
+import Starfield from '~/components/ui/Starfield';
 import { classNames } from '~/utils/classNames';
 import { PROVIDER_LIST } from '~/utils/constants';
 import { Messages } from './Messages.client';
@@ -342,9 +343,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           <div
             className={classNames(
               styles.Chat,
-              'relative flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full',
+              'relative isolate flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full',
             )}
           >
+            {!chatStarted && <Starfield />}
             {!chatStarted && <PlanetSilhouette />}
             {!chatStarted && (
               <div id="intro" className="mt-[20vh] mb-4 max-w-2xl mx-auto text-center px-4 lg:px-0">

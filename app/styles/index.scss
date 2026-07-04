@@ -97,12 +97,25 @@ h6 {
   max-width: var(--chat-max-width);
 }
 
+.shadow-hard-sm {
+  box-shadow: var(--sl-hard-x-sm) var(--sl-hard-y-sm) 0 0 var(--sl-hard);
+}
+
 .shadow-hard {
   box-shadow: var(--sl-hard-x) var(--sl-hard-y) 0 0 var(--sl-hard);
 }
 
 .shadow-hard-lg {
   box-shadow: var(--sl-hard-x-lg) var(--sl-hard-y-lg) 0 0 var(--sl-hard);
+}
+
+.press-hard-sm {
+  transition-property: transform, box-shadow;
+
+  &:active {
+    transform: translate(var(--sl-hard-x-sm), var(--sl-hard-y-sm));
+    box-shadow: none;
+  }
 }
 
 .press-hard {
