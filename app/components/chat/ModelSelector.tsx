@@ -4,6 +4,8 @@ import type { KeyboardEvent } from 'react';
 import type { ModelInfo } from '~/lib/modules/llm/types';
 import { classNames } from '~/utils/classNames';
 import { LOCAL_PROVIDERS } from '~/lib/stores/settings';
+import { getRecommendedModel, blendedPricePerMillion, getCostTier } from '~/utils/modelEconomics';
+import { toast } from 'react-toastify';
 
 // Fuzzy search utilities
 const levenshteinDistance = (str1: string, str2: string): number => {
@@ -92,9 +94,9 @@ interface ModelSelectorProps {
 }
 
 // Helper function to determine if a model is likely free
-const isModelLikelyFree = (model: ModelInfo, providerName?: string): boolean => {
-  // OpenRouter models with zero pricing in the label
-  if (providerName === 'OpenRouter' && model.label.includes('in:$0.00') && model.label.includes('out:$0.00')) {
+const isModelLikelyFree = (model: ModelInfo): boolean => {
+  // Models with real $0 pricing data (OpenRouter)
+  if (model.pricing && model.pricing.promptPerMillion === 0 && model.pricing.completionPerMillion === 0) {
     return true;
   }
 
@@ -205,7 +207,7 @@ export const ModelSelector = ({
     return baseModels
       .filter((model) => {
         // Apply free models filter
-        if (showFreeModelsOnly && !isModelLikelyFree(model, provider?.name)) {
+        if (showFreeModelsOnly && !isModelLikelyFree(model)) {
           return false;
         }
 
@@ -238,6 +240,9 @@ export const ModelSelector = ({
         return a.label.localeCompare(b.label);
       });
   }, [modelList, provider?.name, showFreeModelsOnly, debouncedModelSearchQuery]);
+
+  // Best price/performance among flagship-tier models — recomputed as pricing/availability changes.
+  const recommendedModelName = useMemo(() => getRecommendedModel(modelList)?.name, [modelList]);
 
   const filteredProviders = useMemo(() => {
     if (!debouncedProviderSearchQuery) {
@@ -739,6 +744,32 @@ export const ModelSelector = ({
                 )}
               </div>
 
+              {/*
+               * Smart Routing placeholder — visible so people know it's coming, but
+               * inert: clicking it does not change the active model. The real
+               * complexity-based routing logic doesn't exist yet.
+               */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast.info('Smart routing is coming soon — pick a model directly for now.');
+                }}
+                className={classNames(
+                  'flex items-center justify-between gap-2 px-2.5 py-2 text-left',
+                  'border border-dashed border-bolt-elements-borderColor',
+                  'hover:border-accent transition-theme',
+                )}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="i-ph:shuffle-fill text-accent text-sm" />
+                  <span className="text-sm text-bolt-elements-textPrimary">Smart Routing</span>
+                </span>
+                <span className="px-1 py-px text-[9px] font-mono font-medium border border-bolt-elements-borderColor text-bolt-elements-textTertiary shrink-0">
+                  Coming soon
+                </span>
+              </button>
+
               {/* Free Models Filter Toggle - Only show for OpenRouter */}
               {provider?.name === 'OpenRouter' && (
                 <div className="flex items-center gap-2">
@@ -893,17 +924,41 @@ export const ModelSelector = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
-                        <div className="truncate">
+                        <div className="flex items-center gap-1.5 truncate">
                           <span
                             dangerouslySetInnerHTML={{
                               __html: (modelOption as any).highlightedLabel || modelOption.label,
                             }}
                           />
+                          {modelOption.name === recommendedModelName && (
+                            <span
+                              className="shrink-0 px-1 py-px text-[9px] font-mono font-medium border border-accent bg-accent/10 text-accent"
+                              title="Best price/performance among well-known models, right now"
+                            >
+                              Recommended
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs text-bolt-elements-textTertiary">
                             {formatContextSize(modelOption.maxTokenAllowed)} tokens
                           </span>
+                          {modelOption.pricing && (
+                            <span
+                              className="flex items-center gap-1 text-xs text-bolt-elements-textTertiary"
+                              title="USD per 1M tokens, input / output"
+                            >
+                              <span
+                                className={classNames('w-1.5 h-1.5 rounded-full shrink-0', {
+                                  'bg-green-500': getCostTier(blendedPricePerMillion(modelOption)!) === 'low',
+                                  'bg-yellow-500': getCostTier(blendedPricePerMillion(modelOption)!) === 'medium',
+                                  'bg-red-500': getCostTier(blendedPricePerMillion(modelOption)!) === 'high',
+                                })}
+                              />
+                              ${modelOption.pricing.promptPerMillion.toFixed(2)} / $
+                              {modelOption.pricing.completionPerMillion.toFixed(2)}
+                            </span>
+                          )}
                           {debouncedModelSearchQuery && (modelOption as any).searchScore > 70 && (
                             <span className="text-xs text-green-500 font-medium">
                               {(modelOption as any).searchScore.toFixed(0)}% match
@@ -912,7 +967,7 @@ export const ModelSelector = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-1 ml-2">
-                        {isModelLikelyFree(modelOption, provider?.name) && (
+                        {isModelLikelyFree(modelOption) && (
                           <span className="i-ph:gift text-xs text-bolt-elements-textTertiary" title="Free model" />
                         )}
                         {model === modelOption.name && (

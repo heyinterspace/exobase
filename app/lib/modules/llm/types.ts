@@ -11,6 +11,17 @@ export interface ModelInfo {
 
   /** Maximum completion/output tokens - how many tokens the model can generate. If not specified, falls back to provider defaults */
   maxCompletionTokens?: number;
+
+  /**
+   * USD per 1M tokens. Only populated for providers with a live pricing source —
+   * currently just OpenRouter, which returns real per-model pricing from its API.
+   * Every other provider has no pricing data available, so this stays undefined
+   * rather than showing a guessed/stale number.
+   */
+  pricing?: {
+    promptPerMillion: number;
+    completionPerMillion: number;
+  };
 }
 
 export interface ProviderInfo {

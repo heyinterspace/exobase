@@ -73,9 +73,13 @@ export default class OpenRouterProvider extends BaseProvider {
 
           return {
             name: m.id,
-            label: `${m.name} - in:$${(m.pricing.prompt * 1_000_000).toFixed(2)} out:$${(m.pricing.completion * 1_000_000).toFixed(2)} - context ${finalContext >= 1000000 ? Math.floor(finalContext / 1000000) + 'M' : Math.floor(finalContext / 1000) + 'k'}`,
+            label: m.name,
             provider: this.name,
             maxTokenAllowed: finalContext,
+            pricing: {
+              promptPerMillion: m.pricing.prompt * 1_000_000,
+              completionPerMillion: m.pricing.completion * 1_000_000,
+            },
           };
         });
     } catch (error) {
