@@ -10,11 +10,11 @@ import PlanetSilhouette from '~/components/ui/PlanetSilhouette';
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'Exobase — Join the waitlist' },
+    { title: 'Join the Exobase waitlist' },
     {
       name: 'description',
       content:
-        'Exobase is the opinionated app builder — best-in-class providers, deeply integrated, so you focus on your idea. Star the repo and join the waitlist for early access.',
+        'Exobase is the opinionated app builder: best-in-class providers, deeply integrated, so you focus on your idea. Star the repo and join the waitlist for prioritized access at launch.',
     },
   ];
 };
@@ -42,7 +42,7 @@ export async function loader() {
 const FEATURES = [
   {
     title: 'Best-in-class by default',
-    body: "One great provider for every layer of your stack — we did the shopping so you don't have to.",
+    body: "One great provider for every layer of your stack. We did the shopping so you don't have to.",
   },
   {
     title: 'Deep, one-click integrations',
@@ -50,7 +50,7 @@ const FEATURES = [
   },
   {
     title: 'Your model, your call',
-    body: "The one thing you customize: which AI model runs your app — since that's where cost actually varies.",
+    body: "The one thing you customize: which AI model runs your app, since that's where cost actually varies.",
   },
 ];
 
@@ -79,7 +79,7 @@ function WaitlistForm({ stars }: { stars: number | null }) {
       >
         <span className="flex items-center gap-2">
           <span className="i-ph:check-circle-fill text-base shrink-0" />
-          You're on the list — we'll email you when it's ready.
+          You're on the list. We'll email you when it's ready.
         </span>
         <a
           href="/"
@@ -165,7 +165,8 @@ export default function Waitlist() {
             style={riseIn(120)}
           >
             The opinionated app builder. We've already picked the best-in-class provider for every layer of your stack
-            and wired it all together — so you focus on your idea, not your infrastructure. Get in early.
+            and wired it all together, so you focus on your idea, not your infrastructure. Join the waitlist for
+            prioritized access when we launch.
           </p>
 
           <div className="animate-rise-in w-full max-w-xl" style={riseIn(240)}>
