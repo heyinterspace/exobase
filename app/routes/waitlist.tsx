@@ -13,7 +13,8 @@ export const meta: MetaFunction = () => {
     { title: 'Exobase — Join the waitlist' },
     {
       name: 'description',
-      content: 'Exobase is a BYO-model AI app builder. Star the repo and join the waitlist for early access.',
+      content:
+        'Exobase is the opinionated app builder — best-in-class providers, deeply integrated, so you focus on your idea. Star the repo and join the waitlist for early access.',
     },
   ];
 };
@@ -40,16 +41,16 @@ export async function loader() {
 
 const FEATURES = [
   {
-    title: 'Bring your own model',
-    body: 'Wire up any provider or key you already have — no lock-in to one vendor.',
+    title: 'Best-in-class by default',
+    body: "One great provider for every layer of your stack — we did the shopping so you don't have to.",
   },
   {
-    title: 'One-click integrations',
-    body: 'GitHub, and more on the way, connected the way OAuth should feel: one click.',
+    title: 'Deep, one-click integrations',
+    body: 'Every provider is wired in the way it should feel, not bolted on as an afterthought.',
   },
   {
-    title: 'Ship, not just prototype',
-    body: 'Go from a prompt to a deployed app without leaving the chat.',
+    title: 'Your model, your call',
+    body: "The one thing you customize: which AI model runs your app — since that's where cost actually varies.",
   },
 ];
 
@@ -162,8 +163,8 @@ export default function Waitlist() {
             className="animate-rise-in text-md lg:text-xl mb-10 text-bolt-elements-textSecondary max-w-xl"
             style={riseIn(120)}
           >
-            Exobase is a BYO-model AI app builder — no vendor lock-in, one-click integrations, and a straight line from
-            prompt to shipped app. Get in early.
+            The opinionated app builder. We've already picked the best-in-class provider for every layer of your stack
+            and wired it all together — so you focus on your idea, not your infrastructure. Get in early.
           </p>
 
           <div className="animate-rise-in w-full max-w-xl" style={riseIn(240)}>
