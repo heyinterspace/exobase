@@ -47,3 +47,44 @@
     transform: translateY(6px);
   }
 }
+
+/*
+ * Hero elements rising up from the planet horizon on the /waitlist page —
+ * fill-mode "both" holds the from-state during animation-delay, so staggered
+ * elements stay invisible until their turn instead of flashing in early.
+ */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise-in {
+  animation: riseIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+// Soft breathing glow on the primary waitlist CTA, once it's risen in.
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow:
+      var(--sl-hard-x) var(--sl-hard-y) 0 0 var(--sl-hard),
+      0 0 0 0 rgba(163, 136, 238, 0.35);
+  }
+
+  50% {
+    box-shadow:
+      var(--sl-hard-x) var(--sl-hard-y) 0 0 var(--sl-hard),
+      0 0 20px 4px rgba(163, 136, 238, 0.35);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2.4s ease-in-out 1.2s infinite;
+}

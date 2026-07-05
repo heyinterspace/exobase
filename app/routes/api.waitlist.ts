@@ -3,6 +3,16 @@ import { withSecurity } from '~/lib/security';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/*
+ * The builder itself is gated behind waitlist signup for now (no real
+ * accounts exist yet) — this cookie is the whole gate. It's a soft,
+ * temporary measure to collect signups before launch, not real auth: it
+ * proves "this browser joined the waitlist," not who the person is.
+ */
+export const WAITLIST_ACCESS_COOKIE = 'exobase_waitlist_access';
+
+const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
 async function waitlistAction({ request, context }: ActionFunctionArgs) {
   const { email } = (await request.json().catch(() => ({}))) as { email?: string };
 
@@ -39,7 +49,14 @@ async function waitlistAction({ request, context }: ActionFunctionArgs) {
     return json({ error: 'Something went wrong. Please try again.' }, { status: 502 });
   }
 
-  return json({ ok: true });
+  return json(
+    { ok: true },
+    {
+      headers: {
+        'Set-Cookie': `${WAITLIST_ACCESS_COOKIE}=1; Path=/; Max-Age=${ONE_YEAR_SECONDS}; SameSite=Lax`,
+      },
+    },
+  );
 }
 
 export const action = withSecurity(waitlistAction, {
