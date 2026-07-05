@@ -110,13 +110,14 @@ function WaitlistForm({ stars }: { stars: number | null }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           disabled={busy}
-          className="flex-1 h-10 rounded-none border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 focus-visible:ring-bolt-elements-focus"
+          className="flex-1 h-10 shadow-hard border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 focus-visible:ring-bolt-elements-focus"
         />
         <Button
           type="submit"
           disabled={busy}
-          className="animate-glow-pulse shrink-0 bg-accent text-accent-ink hover:bg-accent hover:brightness-110"
+          className="shrink-0 gap-2 bg-accent text-accent-ink hover:bg-accent hover:brightness-110"
         >
+          <span className="i-ph:rocket-launch-fill text-base" />
           {busy ? 'Joining…' : 'Join waitlist'}
         </Button>
         <a
@@ -125,8 +126,8 @@ function WaitlistForm({ stars }: { stars: number | null }) {
           rel="noopener noreferrer"
           className={classNames(buttonVariants({ variant: 'outline' }), 'shrink-0 gap-2')}
         >
-          <span className="i-ph:star-fill text-base" />
-          Star on GitHub
+          <span className="i-ph:github-logo-fill text-base" />
+          Star
           {typeof stars === 'number' && (
             <span className="px-1.5 py-px text-xs font-mono border border-bolt-elements-borderColor text-bolt-elements-textSecondary">
               {stars}
