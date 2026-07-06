@@ -64,7 +64,7 @@ export function GitHubAuthDialog({ isOpen, onClose, onSuccess }: GitHubAuthDialo
             {!showManualToken ? (
               <div className="space-y-4">
                 <p className="text-sm text-bolt-elements-textSecondary">
-                  One click, no tokens to generate — you'll approve access on GitHub's own sign-in page.
+                  One click, no tokens to generate. You'll approve access on GitHub's own sign-in page.
                 </p>
                 <DialogButton
                   type="primary"
