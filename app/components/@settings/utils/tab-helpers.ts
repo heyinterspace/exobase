@@ -1,10 +1,7 @@
 import type { TabVisibilityConfig } from '~/components/@settings/core/types';
 import { DEFAULT_TAB_CONFIG } from '~/components/@settings/core/constants';
 
-export const getVisibleTabs = (
-  tabConfiguration: { userTabs: TabVisibilityConfig[] },
-  notificationsEnabled: boolean,
-): TabVisibilityConfig[] => {
+export const getVisibleTabs = (tabConfiguration: { userTabs: TabVisibilityConfig[] }): TabVisibilityConfig[] => {
   if (!tabConfiguration?.userTabs || !Array.isArray(tabConfiguration.userTabs)) {
     console.warn('Invalid tab configuration, using defaults');
     return DEFAULT_TAB_CONFIG as TabVisibilityConfig[];
@@ -15,11 +12,6 @@ export const getVisibleTabs = (
     .filter((tab) => {
       if (!tab || typeof tab.id !== 'string') {
         console.warn('Invalid tab entry:', tab);
-        return false;
-      }
-
-      // Hide notifications tab if notifications are disabled
-      if (tab.id === 'notifications' && !notificationsEnabled) {
         return false;
       }
 

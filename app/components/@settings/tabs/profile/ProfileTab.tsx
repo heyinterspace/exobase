@@ -4,12 +4,23 @@ import { classNames } from '~/utils/classNames';
 import { profileStore, updateProfile } from '~/lib/stores/profile';
 import { toast } from 'react-toastify';
 import { debounce } from '~/utils/debounce';
+import { Switch } from '~/components/ui/Switch';
+import NotificationsTab from '~/components/@settings/tabs/notifications/NotificationsTab';
+import FeaturesTab from '~/components/@settings/tabs/features/FeaturesTab';
 
-export default function ProfileTab() {
+function SectionHeading({ icon, title }: { icon: string; title: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <div className={classNames(icon, 'w-4 h-4 text-accent')} />
+      <span className="font-display text-sm font-semibold text-bolt-elements-textPrimary">{title}</span>
+    </div>
+  );
+}
+
+function ProfileFieldsSection() {
   const profile = useStore(profileStore);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Create debounced update functions
   const debouncedUpdate = useCallback(
     debounce((field: 'username' | 'bio', value: string) => {
       updateProfile({ [field]: value });
@@ -28,7 +39,6 @@ export default function ProfileTab() {
     try {
       setIsUploading(true);
 
-      // Convert the file to base64
       const reader = new FileReader();
 
       reader.onloadend = () => {
@@ -52,130 +62,147 @@ export default function ProfileTab() {
   };
 
   const handleProfileUpdate = (field: 'username' | 'bio', value: string) => {
-    // Update the store immediately for UI responsiveness
     updateProfile({ [field]: value });
-
-    // Debounce the toast notification
     debouncedUpdate(field, value);
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="space-y-6">
-        {/* Personal Information Section */}
-        <div>
-          {/* Avatar Upload */}
-          <div className="flex items-start gap-6 mb-8">
-            <div
-              className={classNames(
-                'w-24 h-24 rounded-full overflow-hidden',
-                'bg-gray-100 dark:bg-gray-800/50',
-                'flex items-center justify-center',
-                'ring-1 ring-gray-200 dark:ring-gray-700',
-                'relative group',
-                'transition-all duration-300 ease-out',
-                'hover:ring-purple-500/30 dark:hover:ring-purple-500/30',
-                'hover:shadow-lg hover:shadow-purple-500/10',
-              )}
-            >
-              {profile.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt="Profile"
-                  className={classNames(
-                    'w-full h-full object-cover',
-                    'transition-all duration-300 ease-out',
-                    'group-hover:scale-105 group-hover:brightness-90',
-                  )}
-                />
-              ) : (
-                <div className="i-ph:robot-fill w-16 h-16 text-gray-400 dark:text-gray-500 transition-colors group-hover:text-purple-500/70 transform -translate-y-1" />
-              )}
+    <div>
+      <SectionHeading icon="i-ph:user-fill" title="Profile" />
 
-              <label
-                className={classNames(
-                  'absolute inset-0',
-                  'flex items-center justify-center',
-                  'bg-black/0 group-hover:bg-black/40',
-                  'cursor-pointer transition-all duration-300 ease-out',
-                  isUploading ? 'cursor-wait' : '',
-                )}
-              >
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                  disabled={isUploading}
-                />
-                {isUploading ? (
-                  <div className="i-ph:spinner-gap w-6 h-6 text-white animate-spin" />
-                ) : (
-                  <div className="i-ph:camera-plus w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out transform group-hover:scale-110" />
-                )}
-              </label>
-            </div>
+      <div className="flex items-start gap-6 mb-6">
+        <div
+          className={classNames(
+            'w-20 h-20 shrink-0 overflow-hidden',
+            'border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2',
+            'flex items-center justify-center relative group',
+          )}
+        >
+          {profile.avatar ? (
+            <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <div className="i-ph:robot-fill w-10 h-10 text-bolt-elements-textTertiary" />
+          )}
 
-            <div className="flex-1 pt-1">
-              <label className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-1">
-                Profile Picture
-              </label>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Upload a profile picture or avatar</p>
-            </div>
-          </div>
+          <label
+            className={classNames(
+              'absolute inset-0 flex items-center justify-center',
+              'bg-black/0 group-hover:bg-black/50',
+              'cursor-pointer transition-colors',
+              isUploading ? 'cursor-wait' : '',
+            )}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+              disabled={isUploading}
+            />
+            {isUploading ? (
+              <div className="i-ph:spinner-gap w-5 h-5 text-white animate-spin" />
+            ) : (
+              <div className="i-ph:camera-plus w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </label>
+        </div>
 
-          {/* Username Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Username</label>
-            <div className="relative group">
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                <div className="i-ph:user-circle-fill w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-purple-500" />
-              </div>
-              <input
-                type="text"
-                value={profile.username}
-                onChange={(e) => handleProfileUpdate('username', e.target.value)}
-                className={classNames(
-                  'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                  'bg-white dark:bg-gray-800/50',
-                  'border border-gray-200 dark:border-gray-700/50',
-                  'text-gray-900 dark:text-white',
-                  'placeholder-gray-400 dark:placeholder-gray-500',
-                  'focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50',
-                  'transition-all duration-300 ease-out',
-                )}
-                placeholder="Enter your username"
-              />
-            </div>
-          </div>
-
-          {/* Bio Input */}
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Bio</label>
-            <div className="relative group">
-              <div className="absolute left-3.5 top-3">
-                <div className="i-ph:text-aa w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-purple-500" />
-              </div>
-              <textarea
-                value={profile.bio}
-                onChange={(e) => handleProfileUpdate('bio', e.target.value)}
-                className={classNames(
-                  'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                  'bg-white dark:bg-gray-800/50',
-                  'border border-gray-200 dark:border-gray-700/50',
-                  'text-gray-900 dark:text-white',
-                  'placeholder-gray-400 dark:placeholder-gray-500',
-                  'focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50',
-                  'transition-all duration-300 ease-out',
-                  'resize-none',
-                  'h-32',
-                )}
-                placeholder="Tell us about yourself"
-              />
-            </div>
-          </div>
+        <div className="flex-1 pt-1">
+          <div className="text-sm font-medium text-bolt-elements-textPrimary mb-1">Profile picture</div>
+          <p className="text-xs text-bolt-elements-textTertiary">Upload a picture or avatar</p>
         </div>
       </div>
+
+      <div className="mb-4">
+        <label className="block text-xs text-bolt-elements-textSecondary mb-1.5">Username</label>
+        <input
+          type="text"
+          value={profile.username}
+          onChange={(e) => handleProfileUpdate('username', e.target.value)}
+          className={classNames(
+            'w-full px-3 py-2 text-sm',
+            'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
+            'text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary',
+            'focus:outline-none focus:border-accent transition-theme',
+          )}
+          placeholder="Enter your username"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs text-bolt-elements-textSecondary mb-1.5">Bio</label>
+        <textarea
+          value={profile.bio}
+          onChange={(e) => handleProfileUpdate('bio', e.target.value)}
+          className={classNames(
+            'w-full px-3 py-2 text-sm resize-none h-24',
+            'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
+            'text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary',
+            'focus:outline-none focus:border-accent transition-theme',
+          )}
+          placeholder="Tell us about yourself"
+        />
+      </div>
+    </div>
+  );
+}
+
+const NOTIFICATIONS_ENABLED_KEY = 'bolt_notifications_enabled';
+
+function getInitialNotificationsEnabled() {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  const stored = localStorage.getItem(NOTIFICATIONS_ENABLED_KEY);
+
+  return stored === null ? true : stored === 'true';
+}
+
+function NotificationsSection() {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(getInitialNotificationsEnabled);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <SectionHeading icon="i-ph:bell-fill" title="Notifications" />
+        <div className="flex items-center gap-2 -mt-4">
+          <span className="text-xs text-bolt-elements-textSecondary">
+            {notificationsEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+          <Switch
+            checked={notificationsEnabled}
+            onCheckedChange={(checked) => {
+              setNotificationsEnabled(checked);
+              localStorage.setItem(NOTIFICATIONS_ENABLED_KEY, String(checked));
+              toast.success(`Notifications ${checked ? 'enabled' : 'disabled'}`);
+            }}
+          />
+        </div>
+      </div>
+
+      <NotificationsTab />
+    </div>
+  );
+}
+
+function AdvancedSection() {
+  return (
+    <div>
+      <SectionHeading icon="i-ph:sliders-horizontal-fill" title="Advanced" />
+      <FeaturesTab />
+    </div>
+  );
+}
+
+export default function ProfileTab() {
+  return (
+    <div className="max-w-2xl mx-auto space-y-8">
+      <ProfileFieldsSection />
+      <div className="border-t border-bolt-elements-borderColor" />
+      <NotificationsSection />
+      <div className="border-t border-bolt-elements-borderColor" />
+      <AdvancedSection />
     </div>
   );
 }

@@ -1,44 +1,44 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import * as RadixDialog from '@radix-ui/react-dialog';
+import { motion, type Variants } from 'framer-motion';
+import { cubicEasingFn } from '~/utils/easings';
 import { classNames } from '~/utils/classNames';
 import { TabTile } from '~/components/@settings/shared/components/TabTile';
 import { useFeatures } from '~/lib/hooks/useFeatures';
-import { useNotifications } from '~/lib/hooks/useNotifications';
 import { useConnectionStatus } from '~/lib/hooks/useConnectionStatus';
 import { tabConfigurationStore, resetTabConfiguration } from '~/lib/stores/settings';
-import { profileStore } from '~/lib/stores/profile';
-import type { TabType, Profile } from './types';
-import { TAB_LABELS, DEFAULT_TAB_CONFIG, TAB_DESCRIPTIONS, TAB_GROUPS, SETTINGS_GROUPS } from './constants';
+import type { TabType } from './types';
+import { TAB_LABELS, DEFAULT_TAB_CONFIG, TAB_DESCRIPTIONS } from './constants';
 import { DialogTitle } from '~/components/ui/Dialog';
 import { AvatarDropdown } from './AvatarDropdown';
 
 // Import all tab components
 import ProfileTab from '~/components/@settings/tabs/profile/ProfileTab';
-import SettingsTab from '~/components/@settings/tabs/settings/SettingsTab';
-import NotificationsTab from '~/components/@settings/tabs/notifications/NotificationsTab';
-import FeaturesTab from '~/components/@settings/tabs/features/FeaturesTab';
-import { DataTab } from '~/components/@settings/tabs/data/DataTab';
-import { EventLogsTab } from '~/components/@settings/tabs/event-logs/EventLogsTab';
-import GitHubTab from '~/components/@settings/tabs/github/GitHubTab';
-import LinearTab from '~/components/@settings/tabs/linear/LinearTab';
-import CloudProvidersTab from '~/components/@settings/tabs/providers/cloud/CloudProvidersTab';
-import LocalProvidersTab from '~/components/@settings/tabs/providers/local/LocalProvidersTab';
-import McpTab from '~/components/@settings/tabs/mcp/McpTab';
+import ChangelogTab from '~/components/@settings/tabs/changelog/ChangelogTab';
+import IntegrationsTab from '~/components/@settings/tabs/integrations/IntegrationsTab';
 
 interface ControlPanelProps {
   open: boolean;
   onClose: () => void;
 }
 
-// Beta status for experimental features
-const BETA_TABS = new Set<TabType>(['local-providers', 'mcp']);
+const transition = { duration: 0.2, ease: cubicEasingFn };
 
-const BetaLabel = () => (
-  <span className="px-1 py-px border border-accent bg-accent/10 text-[9px] font-mono font-medium text-accent shrink-0">
-    BETA
-  </span>
-);
+/**
+ * Settings is a layer that travels over the app, not a pop-up that
+ * materializes in place — it slides in from off-screen right and settles
+ * centered, matching the shared Dialog component's convention.
+ */
+const backdropVariants = {
+  closed: { opacity: 0, transition },
+  open: { opacity: 1, transition },
+} satisfies Variants;
+
+const panelVariants = {
+  closed: { x: '6vw', opacity: 0, transition },
+  open: { x: 0, opacity: 1, transition },
+} satisfies Variants;
 
 export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
   // State
@@ -48,11 +48,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
 
   // Store values
   const tabConfiguration = useStore(tabConfigurationStore);
-  const profile = useStore(profileStore) as Profile;
 
   // Status hooks
   const { hasNewFeatures, unviewedFeatures, acknowledgeAllFeatures } = useFeatures();
-  const { hasUnreadNotifications, unreadNotifications, markAllAsRead } = useNotifications();
   const { hasConnectionIssues, currentIssue, acknowledgeIssue } = useConnectionStatus();
 
   // Memoize the base tab configurations to avoid recalculation
@@ -69,23 +67,10 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       return [];
     }
 
-    const notificationsDisabled = profile?.preferences?.notifications === false;
-
-    // Optimize user mode tab filtering
     return tabConfiguration.userTabs
-      .filter((tab) => {
-        if (!tab?.id) {
-          return false;
-        }
-
-        if (tab.id === 'notifications' && notificationsDisabled) {
-          return false;
-        }
-
-        return tab.visible && tab.window === 'user';
-      })
+      .filter((tab) => tab?.id && tab.visible && tab.window === 'user')
       .sort((a, b) => a.order - b.order);
-  }, [tabConfiguration, profile?.preferences?.notifications, baseTabConfig]);
+  }, [tabConfiguration, baseTabConfig]);
 
   // Reset to default view when modal opens/closes
   useEffect(() => {
@@ -121,26 +106,10 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
     switch (tabId) {
       case 'profile':
         return <ProfileTab />;
-      case 'settings':
-        return <SettingsTab />;
-      case 'notifications':
-        return <NotificationsTab />;
-      case 'features':
-        return <FeaturesTab />;
-      case 'data':
-        return <DataTab />;
-      case 'cloud-providers':
-        return <CloudProvidersTab />;
-      case 'local-providers':
-        return <LocalProvidersTab />;
-      case 'github':
-        return <GitHubTab />;
-      case 'linear':
-        return <LinearTab />;
-      case 'event-logs':
-        return <EventLogsTab />;
-      case 'mcp':
-        return <McpTab />;
+      case 'changelog':
+        return <ChangelogTab />;
+      case 'integrations':
+        return <IntegrationsTab />;
 
       default:
         return null;
@@ -149,12 +118,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
 
   const getTabUpdateStatus = (tabId: TabType): boolean => {
     switch (tabId) {
-      case 'features':
+      case 'changelog':
         return hasNewFeatures;
-      case 'notifications':
-        return hasUnreadNotifications;
-      case 'github':
-      case 'linear':
+      case 'integrations':
         return hasConnectionIssues;
       default:
         return false;
@@ -163,12 +129,9 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
 
   const getStatusMessage = (tabId: TabType): string => {
     switch (tabId) {
-      case 'features':
-        return `${unviewedFeatures.length} new feature${unviewedFeatures.length === 1 ? '' : 's'} to explore`;
-      case 'notifications':
-        return `${unreadNotifications.length} unread notification${unreadNotifications.length === 1 ? '' : 's'}`;
-      case 'github':
-      case 'linear':
+      case 'changelog':
+        return `${unviewedFeatures.length} new update${unviewedFeatures.length === 1 ? '' : 's'} to see`;
+      case 'integrations':
         return currentIssue === 'disconnected'
           ? 'Connection lost'
           : currentIssue === 'high-latency'
@@ -186,14 +149,10 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
 
     // Acknowledge notifications based on tab
     switch (tabId) {
-      case 'features':
+      case 'changelog':
         acknowledgeAllFeatures();
         break;
-      case 'notifications':
-        markAllAsRead();
-        break;
-      case 'github':
-      case 'linear':
+      case 'integrations':
         acknowledgeIssue();
         break;
     }
@@ -206,24 +165,35 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
     <RadixDialog.Root open={open}>
       <RadixDialog.Portal>
         <div className="fixed inset-0 flex items-center justify-center z-[100] modern-scrollbar">
-          <RadixDialog.Overlay className="absolute inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-sm transition-opacity duration-200" />
+          <RadixDialog.Overlay asChild>
+            <motion.div
+              className="absolute inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-sm"
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={backdropVariants}
+            />
+          </RadixDialog.Overlay>
 
           <RadixDialog.Content
             aria-describedby={undefined}
             onEscapeKeyDown={handleClose}
             onPointerDownOutside={handleClose}
             className="relative z-[101]"
+            asChild
           >
-            <div
+            <motion.div
               className={classNames(
                 'w-[95vw] max-w-[1200px] h-[85vh] max-h-[900px]',
                 'glass',
                 'border border-bolt-elements-borderColor shadow-hard-lg',
                 'flex flex-col overflow-hidden',
                 'relative',
-                'transform transition-all duration-200 ease-out',
-                open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[6vw]',
               )}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={panelVariants}
             >
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
@@ -242,7 +212,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                       </button>
                     )}
                     <DialogTitle className="text-xl font-display font-semibold text-bolt-elements-textPrimary">
-                      {showTabManagement ? 'Tab Management' : activeTab ? TAB_LABELS[activeTab] : 'Control Panel'}
+                      {showTabManagement ? 'Tab Management' : activeTab ? TAB_LABELS[activeTab] : 'Settings'}
                     </DialogTitle>
                   </div>
 
@@ -283,38 +253,21 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                       activeTab || showTabManagement ? 'scale-95 opacity-40 pointer-events-none' : '',
                     )}
                   >
-                    <div className="p-6 flex flex-col gap-6">
-                      {SETTINGS_GROUPS.map((group) => {
-                        const tabsInGroup = visibleTabs.filter((tab) => TAB_GROUPS[tab.id as TabType] === group.id);
-
-                        if (tabsInGroup.length === 0) {
-                          return null;
-                        }
-
-                        return (
-                          <div key={group.id}>
-                            <h2 className="font-display text-sm font-semibold text-bolt-elements-textPrimary mb-2">
-                              {group.label}
-                            </h2>
-                            <div className="border border-bolt-elements-borderColor divide-y divide-bolt-elements-borderColor">
-                              {tabsInGroup.map((tab) => (
-                                <TabTile
-                                  key={tab.id}
-                                  tab={tab}
-                                  onClick={() => handleTabClick(tab.id as TabType)}
-                                  isActive={activeTab === tab.id}
-                                  hasUpdate={getTabUpdateStatus(tab.id)}
-                                  statusMessage={getStatusMessage(tab.id)}
-                                  description={TAB_DESCRIPTIONS[tab.id]}
-                                  isLoading={loadingTab === tab.id}
-                                >
-                                  {BETA_TABS.has(tab.id) && <BetaLabel />}
-                                </TabTile>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="p-6">
+                      <div className="border border-bolt-elements-borderColor divide-y divide-bolt-elements-borderColor">
+                        {visibleTabs.map((tab) => (
+                          <TabTile
+                            key={tab.id}
+                            tab={tab}
+                            onClick={() => handleTabClick(tab.id as TabType)}
+                            isActive={activeTab === tab.id}
+                            hasUpdate={getTabUpdateStatus(tab.id as TabType)}
+                            statusMessage={getStatusMessage(tab.id as TabType)}
+                            description={TAB_DESCRIPTIONS[tab.id as TabType]}
+                            isLoading={loadingTab === tab.id}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -334,7 +287,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </RadixDialog.Content>
         </div>
       </RadixDialog.Portal>
