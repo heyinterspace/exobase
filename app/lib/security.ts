@@ -16,6 +16,9 @@ const RATE_LIMITS = {
 
   // Netlify API endpoints
   '/api/netlify-*': { windowMs: 60 * 1000, maxRequests: 20 }, // 20 requests per minute
+
+  // Waitlist signup (public, unauthenticated — keep tight to deter spam)
+  '/api/waitlist': { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 requests per 15 minutes
 };
 
 /**
