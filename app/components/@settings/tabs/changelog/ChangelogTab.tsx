@@ -72,7 +72,7 @@ function VersionHeader() {
         <span className="text-sm text-bolt-elements-textPrimary">
           Exobase {currentVersion ? `v${currentVersion}` : ''}
         </span>
-        {updateAvailable && <span className="text-xs text-accent">— v{updateAvailable} available</span>}
+        {updateAvailable && <span className="text-xs text-accent">· v{updateAvailable} available</span>}
       </div>
       <button
         type="button"
