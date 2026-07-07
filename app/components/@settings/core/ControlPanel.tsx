@@ -21,11 +21,7 @@ import FeaturesTab from '~/components/@settings/tabs/features/FeaturesTab';
 import { DataTab } from '~/components/@settings/tabs/data/DataTab';
 import { EventLogsTab } from '~/components/@settings/tabs/event-logs/EventLogsTab';
 import GitHubTab from '~/components/@settings/tabs/github/GitHubTab';
-import GitLabTab from '~/components/@settings/tabs/gitlab/GitLabTab';
-import SupabaseTab from '~/components/@settings/tabs/supabase/SupabaseTab';
 import LinearTab from '~/components/@settings/tabs/linear/LinearTab';
-import VercelTab from '~/components/@settings/tabs/vercel/VercelTab';
-import NetlifyTab from '~/components/@settings/tabs/netlify/NetlifyTab';
 import CloudProvidersTab from '~/components/@settings/tabs/providers/cloud/CloudProvidersTab';
 import LocalProvidersTab from '~/components/@settings/tabs/providers/local/LocalProvidersTab';
 import McpTab from '~/components/@settings/tabs/mcp/McpTab';
@@ -139,16 +135,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
         return <LocalProvidersTab />;
       case 'github':
         return <GitHubTab />;
-      case 'gitlab':
-        return <GitLabTab />;
-      case 'supabase':
-        return <SupabaseTab />;
       case 'linear':
         return <LinearTab />;
-      case 'vercel':
-        return <VercelTab />;
-      case 'netlify':
-        return <NetlifyTab />;
       case 'event-logs':
         return <EventLogsTab />;
       case 'mcp':
@@ -166,11 +154,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       case 'notifications':
         return hasUnreadNotifications;
       case 'github':
-      case 'gitlab':
-      case 'supabase':
       case 'linear':
-      case 'vercel':
-      case 'netlify':
         return hasConnectionIssues;
       default:
         return false;
@@ -184,11 +168,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       case 'notifications':
         return `${unreadNotifications.length} unread notification${unreadNotifications.length === 1 ? '' : 's'}`;
       case 'github':
-      case 'gitlab':
-      case 'supabase':
       case 'linear':
-      case 'vercel':
-      case 'netlify':
         return currentIssue === 'disconnected'
           ? 'Connection lost'
           : currentIssue === 'high-latency'
@@ -213,11 +193,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
         markAllAsRead();
         break;
       case 'github':
-      case 'gitlab':
-      case 'supabase':
       case 'linear':
-      case 'vercel':
-      case 'netlify':
         acknowledgeIssue();
         break;
     }
