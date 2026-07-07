@@ -11,6 +11,27 @@ export interface ModelInfo {
 
   /** Maximum completion/output tokens - how many tokens the model can generate. If not specified, falls back to provider defaults */
   maxCompletionTokens?: number;
+
+  /**
+   * USD per 1M tokens. Only populated for providers with a live pricing source —
+   * currently just OpenRouter, which returns real per-model pricing from its API.
+   * Every other provider has no pricing data available, so this stays undefined
+   * rather than showing a guessed/stale number.
+   */
+  pricing?: {
+    promptPerMillion: number;
+    completionPerMillion: number;
+  };
+
+  /**
+   * Neutral third-party quality score, 0-100 — OpenRouter's `coding_index` from
+   * Artificial Analysis (independent model benchmarker, not affiliated with any
+   * vendor), i.e. a coding-specific score rather than general intelligence,
+   * since Exobase is a coding tool. Only populated where OpenRouter's API
+   * actually returns it — roughly a quarter of listed models, generally the
+   * well-known ones.
+   */
+  qualityScore?: number;
 }
 
 export interface ProviderInfo {

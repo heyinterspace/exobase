@@ -142,3 +142,24 @@
     @apply font-sans;
   }
 }
+
+/* Homepage hero starfield — see app/components/ui/Starfield.tsx.
+   Duration/delay are set per-star via inline style; this class only
+   supplies the name/timing/iteration so those inline values win. */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-star-twinkle {
+  animation-name: star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}

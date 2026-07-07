@@ -117,7 +117,7 @@ export class ImportExportService {
         // UI configuration
         ui: {
           // Tab configuration
-          bolt_tab_configuration: this._safeGetItem('bolt_tab_configuration'),
+          bolt_tab_configuration: this._safeGetItem('bolt_tab_configuration_v2'),
           tabConfiguration: allCookies.tabConfiguration,
 
           // Prompt settings
@@ -421,7 +421,7 @@ export class ImportExportService {
       // Import localStorage UI settings
       if (data.ui.bolt_tab_configuration) {
         try {
-          this._safeSetItem('bolt_tab_configuration', data.ui.bolt_tab_configuration);
+          this._safeSetItem('bolt_tab_configuration_v2', data.ui.bolt_tab_configuration);
         } catch (err) {
           console.error('Error importing tab configuration:', err);
         }

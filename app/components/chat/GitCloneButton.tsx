@@ -176,17 +176,16 @@ ${escapeBoltTags(file.content)}
           onClick={openDialog}
           disabled={!ready || loading}
           className={classNames(
-            'flex items-center gap-1 px-2 py-1.5 shrink-0',
-            'border border-bolt-elements-borderColor shadow-hard press-hard',
-            'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary',
+            'flex items-center justify-center p-1.5 shrink-0',
+            'border border-bolt-elements-borderColor shadow-hard-sm press-hard-sm',
+            'bg-bolt-elements-background-depth-3 text-bolt-elements-textSecondary',
             'hover:border-accent hover:text-accent',
-            'text-xs font-medium transition-theme',
-            'disabled:opacity-30 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard',
+            'transition-theme',
+            'disabled:opacity-30 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:shadow-hard-sm',
             className,
           )}
         >
           <Github className="w-4 h-4" />
-          Remix
         </button>
       ) : (
         <Button
