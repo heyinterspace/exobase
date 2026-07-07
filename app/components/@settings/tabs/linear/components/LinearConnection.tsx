@@ -39,7 +39,7 @@ export function LinearConnection() {
           !showManualToken ? (
             <div className="space-y-4">
               <p className="text-sm text-bolt-elements-textSecondary">
-                One click, no API keys to generate — you'll approve access on Linear's own sign-in page.
+                One click, no API keys to generate. You'll approve access on Linear's own sign-in page.
               </p>
               <button
                 type="button"

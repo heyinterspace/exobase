@@ -82,7 +82,7 @@ export function LinearChatAlert({ alert, clearAlert, postMessage }: Props) {
         {created ? (
           <div className="p-3 border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 flex items-center justify-between">
             <span className="text-sm text-bolt-elements-textPrimary">
-              <span className="text-bolt-elements-textSecondary">{created.identifier}</span> — {issueTitle}
+              <span className="text-bolt-elements-textSecondary">{created.identifier}</span> · {issueTitle}
             </span>
             <a
               href={created.url}

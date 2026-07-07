@@ -13,7 +13,7 @@ export default function LinearTab() {
       </div>
 
       <p className="text-sm text-bolt-elements-textSecondary">
-        Connect Linear so the AI can create and reference issues directly from chat — draft an issue in conversation,
+        Connect Linear so the AI can create and reference issues directly from chat. Draft an issue in conversation,
         approve it with one click, done.
       </p>
 
@@ -21,7 +21,7 @@ export default function LinearTab() {
 
       {isConnected && connection.teams && connection.teams.length > 1 && (
         <p className="text-xs text-bolt-elements-textTertiary">
-          {connection.teams.length} teams available — the first issue you create will ask which team to use, then
+          {connection.teams.length} teams available. The first issue you create will ask which team to use, then
           remember it.
         </p>
       )}
