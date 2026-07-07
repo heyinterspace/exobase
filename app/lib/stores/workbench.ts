@@ -17,7 +17,7 @@ import { extractRelativePath } from '~/utils/diff';
 import { description } from '~/lib/persistence';
 import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
-import type { ActionAlert, DeployAlert, SupabaseAlert } from '~/types/actions';
+import type { ActionAlert, DeployAlert, SupabaseAlert, LinearAlert } from '~/types/actions';
 
 const { saveAs } = fileSaver;
 
@@ -52,6 +52,8 @@ export class WorkbenchStore {
     import.meta.hot?.data.actionAlert ?? atom<ActionAlert | undefined>(undefined);
   supabaseAlert: WritableAtom<SupabaseAlert | undefined> =
     import.meta.hot?.data.supabaseAlert ?? atom<SupabaseAlert | undefined>(undefined);
+  linearAlert: WritableAtom<LinearAlert | undefined> =
+    import.meta.hot?.data.linearAlert ?? atom<LinearAlert | undefined>(undefined);
   deployAlert: WritableAtom<DeployAlert | undefined> =
     import.meta.hot?.data.deployAlert ?? atom<DeployAlert | undefined>(undefined);
   modifiedFiles = new Set<string>();
@@ -65,6 +67,7 @@ export class WorkbenchStore {
       import.meta.hot.data.currentView = this.currentView;
       import.meta.hot.data.actionAlert = this.actionAlert;
       import.meta.hot.data.supabaseAlert = this.supabaseAlert;
+      import.meta.hot.data.linearAlert = this.linearAlert;
       import.meta.hot.data.deployAlert = this.deployAlert;
 
       // Ensure binary files are properly preserved across hot reloads
@@ -126,6 +129,14 @@ export class WorkbenchStore {
 
   clearSupabaseAlert() {
     this.supabaseAlert.set(undefined);
+  }
+
+  get LinearAlert() {
+    return this.linearAlert;
+  }
+
+  clearLinearAlert() {
+    this.linearAlert.set(undefined);
   }
 
   get DeployAlert() {
@@ -504,6 +515,13 @@ export class WorkbenchStore {
           }
 
           this.deployAlert.set(alert);
+        },
+        (alert) => {
+          if (this.#reloadedMessages.has(messageId)) {
+            return;
+          }
+
+          this.linearAlert.set(alert);
         },
       ),
     });

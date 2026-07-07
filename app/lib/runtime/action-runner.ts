@@ -1,7 +1,16 @@
 import type { WebContainer } from '@webcontainer/api';
 import { path as nodePath } from '~/utils/path';
 import { atom, map, type MapStore } from 'nanostores';
-import type { ActionAlert, BoltAction, DeployAlert, FileHistory, SupabaseAction, SupabaseAlert } from '~/types/actions';
+import type {
+  ActionAlert,
+  BoltAction,
+  DeployAlert,
+  FileHistory,
+  SupabaseAction,
+  SupabaseAlert,
+  LinearAction,
+  LinearAlert,
+} from '~/types/actions';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
@@ -72,6 +81,7 @@ export class ActionRunner {
   onAlert?: (alert: ActionAlert) => void;
   onSupabaseAlert?: (alert: SupabaseAlert) => void;
   onDeployAlert?: (alert: DeployAlert) => void;
+  onLinearAlert?: (alert: LinearAlert) => void;
   buildOutput?: { path: string; exitCode: number; output: string };
 
   constructor(
@@ -80,12 +90,14 @@ export class ActionRunner {
     onAlert?: (alert: ActionAlert) => void,
     onSupabaseAlert?: (alert: SupabaseAlert) => void,
     onDeployAlert?: (alert: DeployAlert) => void,
+    onLinearAlert?: (alert: LinearAlert) => void,
   ) {
     this.#webcontainer = webcontainerPromise;
     this.#shellTerminal = getShellTerminal;
     this.onAlert = onAlert;
     this.onSupabaseAlert = onSupabaseAlert;
     this.onDeployAlert = onDeployAlert;
+    this.onLinearAlert = onLinearAlert;
   }
 
   addAction(data: ActionCallbackData) {
@@ -174,6 +186,18 @@ export class ActionRunner {
             });
 
             // Return early without re-throwing
+            return;
+          }
+          break;
+        }
+        case 'linear': {
+          try {
+            await this.handleLinearAction(action as LinearAction);
+          } catch (error: any) {
+            this.#updateAction(actionId, {
+              status: 'failed',
+              error: error instanceof Error ? error.message : 'Linear action failed',
+            });
             return;
           }
           break;
@@ -515,6 +539,34 @@ export class ActionRunner {
         });
 
         // The actual execution will be triggered from SupabaseChatAlert
+        return { pending: true };
+      }
+
+      default:
+        throw new Error(`Unknown operation: ${operation}`);
+    }
+  }
+
+  async handleLinearAction(action: LinearAction) {
+    const { operation, title, content, teamId } = action;
+    logger.debug('[Linear Action]:', { operation, title, teamId });
+
+    switch (operation) {
+      case 'create_issue': {
+        /*
+         * Always show the alert and let LinearChatAlert handle connection
+         * state and the actual create-issue request, same as Supabase queries.
+         */
+        this.onLinearAlert?.({
+          type: 'info',
+          title: 'Create Linear Issue',
+          description: 'Track this in Linear',
+          issueTitle: title,
+          content,
+          teamId,
+          source: 'linear',
+        });
+
         return { pending: true };
       }
 

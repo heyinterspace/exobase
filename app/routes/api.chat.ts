@@ -48,7 +48,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     },
   });
 
-  const { messages, files, promptId, contextOptimization, supabase, chatMode, designScheme, maxLLMSteps } =
+  const { messages, files, promptId, contextOptimization, supabase, linear, chatMode, designScheme, maxLLMSteps } =
     await request.json<{
       messages: Messages;
       files: any;
@@ -63,6 +63,9 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           anonKey?: string;
           supabaseUrl?: string;
         };
+      };
+      linear?: {
+        isConnected: boolean;
       };
       maxLLMSteps: number;
     }>();
@@ -209,6 +212,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
         const options: StreamingOptions = {
           supabaseConnection: supabase,
+          linearConnection: linear,
           toolChoice: 'auto',
           tools: mcpService.toolsWithoutExecute,
           maxSteps: maxLLMSteps,

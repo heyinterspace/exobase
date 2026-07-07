@@ -1,5 +1,5 @@
 import { Nango } from '@nangohq/node';
-import { parseCookies } from './cookies';
+import { parseCookies, getApiKeysFromCookie } from './cookies';
 
 /**
  * Resolves the Nango secret key the same way other server-only secrets are
@@ -21,15 +21,20 @@ function getNangoClient(context: any): Nango | null {
 }
 
 /**
- * If the browser holds a Nango GitHub connectionId (set after a successful
- * OAuth popup, see useGitHubConnection.ts), fetch a live, auto-refreshed
- * access token from Nango instead of trusting a client-supplied token — the
- * real GitHub token never has to touch the browser. Returns null if Nango
- * isn't configured or the user hasn't connected via OAuth (falls through to
- * the existing cookie/env token chain in that case).
+ * If the browser holds a Nango connectionId cookie for the given integration
+ * (set after a successful OAuth popup — see useNangoConnect.ts), fetch a
+ * live, auto-refreshed access token from Nango instead of trusting a
+ * client-supplied token — the real provider token never has to touch the
+ * browser. Returns null if Nango isn't configured or the user hasn't
+ * connected via OAuth (callers fall through to their own cookie/env chain).
  */
-export async function getGitHubTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
-  const connectionId = parseCookies(cookieHeader).githubNangoConnectionId;
+export async function getTokenFromNango(
+  cookieHeader: string | null,
+  context: any,
+  integrationId: string,
+  connectionIdCookieName: string,
+): Promise<string | null> {
+  const connectionId = parseCookies(cookieHeader)[connectionIdCookieName];
   const nango = getNangoClient(context);
 
   if (!connectionId || !nango) {
@@ -37,12 +42,52 @@ export async function getGitHubTokenFromNango(cookieHeader: string | null, conte
   }
 
   try {
-    const connection = await nango.getConnection('github', connectionId);
+    const connection = await nango.getConnection(integrationId, connectionId);
     const { credentials } = connection;
 
     return credentials.type === 'OAUTH2' ? credentials.access_token : null;
   } catch (error) {
-    console.error('Failed to fetch GitHub token from Nango:', error);
+    console.error(`Failed to fetch ${integrationId} token from Nango:`, error);
     return null;
   }
+}
+
+export function getGitHubTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
+  return getTokenFromNango(cookieHeader, context, 'github', 'githubNangoConnectionId');
+}
+
+export function getLinearTokenFromNango(cookieHeader: string | null, context: any): Promise<string | null> {
+  return getTokenFromNango(cookieHeader, context, 'linear', 'linearNangoConnectionId');
+}
+
+export interface ResolvedLinearToken {
+  token: string;
+
+  /**
+   * OAuth2 tokens (via Nango) need "Bearer "; Linear personal API keys are
+   * sent as-is. Shared by api.linear-user.ts and api.linear-issue.ts.
+   */
+  isOAuth: boolean;
+}
+
+export async function resolveLinearToken(
+  cookieHeader: string | null,
+  context: any,
+): Promise<ResolvedLinearToken | null> {
+  const oauthToken = await getLinearTokenFromNango(cookieHeader, context);
+
+  if (oauthToken) {
+    return { token: oauthToken, isOAuth: true };
+  }
+
+  const apiKeys = getApiKeysFromCookie(cookieHeader);
+  const personalKey =
+    apiKeys.LINEAR_API_KEY ||
+    apiKeys.VITE_LINEAR_API_KEY ||
+    context?.cloudflare?.env?.LINEAR_API_KEY ||
+    context?.cloudflare?.env?.VITE_LINEAR_API_KEY ||
+    process.env.LINEAR_API_KEY ||
+    process.env.VITE_LINEAR_API_KEY;
+
+  return personalKey ? { token: personalKey, isOAuth: false } : null;
 }

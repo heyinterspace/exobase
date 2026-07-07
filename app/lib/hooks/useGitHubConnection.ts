@@ -2,33 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
-import Nango from '@nangohq/frontend';
 import type { GitHubUserResponse, GitHubConnection } from '~/types/GitHub';
 import { useGitHubAPI } from './useGitHubAPI';
+import { connectViaNango } from './useNangoConnect';
 import {
   githubConnection,
   isConnecting,
   updateGitHubConnection,
   initializeGitHubConnection,
 } from '~/lib/stores/github';
-
-/*
- * A stable anonymous id, not a login — only used so Nango can group a
- * browser's connections in its dashboard. Exobase has no server-side user
- * accounts, so there's nothing more meaningful to key it to.
- */
-function getOrCreateNangoEndUserId(): string {
-  const existing = Cookies.get('exobaseUserId');
-
-  if (existing) {
-    return existing;
-  }
-
-  const id = crypto.randomUUID();
-  Cookies.set('exobaseUserId', id, { expires: 3650 });
-
-  return id;
-}
 
 export interface ConnectionState {
   isConnected: boolean;
@@ -132,34 +114,7 @@ export function useGitHubConnection(): UseGitHubConnectionReturn {
     setError(null);
 
     try {
-      const sessionRes = await fetch('/api/nango-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ integrationId: 'github', endUserId: getOrCreateNangoEndUserId() }),
-      });
-
-      if (!sessionRes.ok) {
-        throw new Error('GitHub OAuth is not set up on this server yet');
-      }
-
-      const { sessionToken } = (await sessionRes.json()) as { sessionToken: string };
-
-      const connectionId = await new Promise<string>((resolve, reject) => {
-        const nango = new Nango();
-        const connect = nango.openConnectUI({
-          onEvent: (event) => {
-            if (event.type === 'connect') {
-              resolve(event.payload.connectionId);
-            } else if (event.type === 'close') {
-              reject(new Error('Connection cancelled'));
-            } else if (event.type === 'error') {
-              reject(new Error(event.payload.errorMessage));
-            }
-          },
-        });
-        connect.setSessionToken(sessionToken);
-      });
-
+      const connectionId = await connectViaNango('github');
       Cookies.set('githubNangoConnectionId', connectionId, { expires: 3650 });
 
       await initializeGitHubConnection();

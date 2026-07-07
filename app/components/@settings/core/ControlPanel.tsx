@@ -23,6 +23,7 @@ import { EventLogsTab } from '~/components/@settings/tabs/event-logs/EventLogsTa
 import GitHubTab from '~/components/@settings/tabs/github/GitHubTab';
 import GitLabTab from '~/components/@settings/tabs/gitlab/GitLabTab';
 import SupabaseTab from '~/components/@settings/tabs/supabase/SupabaseTab';
+import LinearTab from '~/components/@settings/tabs/linear/LinearTab';
 import VercelTab from '~/components/@settings/tabs/vercel/VercelTab';
 import NetlifyTab from '~/components/@settings/tabs/netlify/NetlifyTab';
 import CloudProvidersTab from '~/components/@settings/tabs/providers/cloud/CloudProvidersTab';
@@ -142,6 +143,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
         return <GitLabTab />;
       case 'supabase':
         return <SupabaseTab />;
+      case 'linear':
+        return <LinearTab />;
       case 'vercel':
         return <VercelTab />;
       case 'netlify':
@@ -165,6 +168,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       case 'github':
       case 'gitlab':
       case 'supabase':
+      case 'linear':
       case 'vercel':
       case 'netlify':
         return hasConnectionIssues;
@@ -182,6 +186,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       case 'github':
       case 'gitlab':
       case 'supabase':
+      case 'linear':
       case 'vercel':
       case 'netlify':
         return currentIssue === 'disconnected'
@@ -210,6 +215,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
       case 'github':
       case 'gitlab':
       case 'supabase':
+      case 'linear':
       case 'vercel':
       case 'netlify':
         acknowledgeIssue();

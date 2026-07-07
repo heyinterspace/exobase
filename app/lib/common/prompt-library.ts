@@ -16,6 +16,9 @@ export interface PromptOptions {
       supabaseUrl?: string;
     };
   };
+  linear?: {
+    isConnected: boolean;
+  };
 }
 
 export class PromptLibrary {
@@ -30,7 +33,7 @@ export class PromptLibrary {
     default: {
       label: 'Default Prompt',
       description: 'An fine tuned prompt for better results and less token usage',
-      get: (options) => getFineTunedPrompt(options.cwd, options.supabase, options.designScheme),
+      get: (options) => getFineTunedPrompt(options.cwd, options.supabase, options.designScheme, options.linear),
     },
     original: {
       label: 'Old Default Prompt',

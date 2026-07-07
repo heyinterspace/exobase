@@ -1,6 +1,6 @@
 import type { Change } from 'diff';
 
-export type ActionType = 'file' | 'shell' | 'supabase';
+export type ActionType = 'file' | 'shell' | 'supabase' | 'linear';
 
 export interface BaseAction {
   content: string;
@@ -30,7 +30,14 @@ export interface SupabaseAction extends BaseAction {
   projectId?: string;
 }
 
-export type BoltAction = FileAction | ShellAction | StartAction | BuildAction | SupabaseAction;
+export interface LinearAction extends BaseAction {
+  type: 'linear';
+  operation: 'create_issue';
+  title: string;
+  teamId?: string;
+}
+
+export type BoltAction = FileAction | ShellAction | StartAction | BuildAction | SupabaseAction | LinearAction;
 
 export type BoltActionData = BoltAction | BaseAction;
 
@@ -48,6 +55,21 @@ export interface SupabaseAlert {
   description: string;
   content: string;
   source?: 'supabase';
+}
+
+export interface LinearAlert {
+  type: string;
+  title: string;
+  description: string;
+
+  /**
+   * The drafted issue's title — distinct from `title` above, which is the
+   * alert card's own generic heading (e.g. "Create Linear Issue").
+   */
+  issueTitle: string;
+  content: string;
+  teamId?: string;
+  source?: 'linear';
 }
 
 export interface DeployAlert {

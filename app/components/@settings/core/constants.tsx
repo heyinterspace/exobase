@@ -38,6 +38,18 @@ const SupabaseIcon = () => (
   </svg>
 );
 
+/*
+ * Linear icon component — a simplified take on Linear's diagonal-bars mark,
+ * not a pixel-exact reproduction of the brand SVG.
+ */
+const LinearIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none">
+    <rect x="15.5" y="1" width="3" height="12" rx="1.5" fill="currentColor" transform="rotate(45 15.5 1)" />
+    <rect x="11" y="5.5" width="3" height="17" rx="1.5" fill="currentColor" transform="rotate(45 11 5.5)" />
+    <rect x="6.5" y="10" width="3" height="22" rx="1.5" fill="currentColor" transform="rotate(45 6.5 10)" />
+  </svg>
+);
+
 export const TAB_ICONS: Record<TabType, React.ComponentType<{ className?: string }>> = {
   profile: User,
   settings: Settings,
@@ -51,6 +63,7 @@ export const TAB_ICONS: Record<TabType, React.ComponentType<{ className?: string
   netlify: () => <NetlifyIcon />,
   vercel: () => <VercelIcon />,
   supabase: () => <SupabaseIcon />,
+  linear: () => <LinearIcon />,
   'event-logs': List,
   mcp: Wrench,
 };
@@ -68,6 +81,7 @@ export const TAB_LABELS: Record<TabType, string> = {
   netlify: 'Netlify',
   vercel: 'Vercel',
   supabase: 'Supabase',
+  linear: 'Linear',
   'event-logs': 'Event Logs',
   mcp: 'MCP Servers',
 };
@@ -85,6 +99,7 @@ export const TAB_DESCRIPTIONS: Record<TabType, string> = {
   netlify: 'Configure Netlify deployment settings',
   vercel: 'Manage Vercel projects and deployments',
   supabase: 'Setup Supabase database connection',
+  linear: 'Connect Linear for one-click issue creation from chat',
   'event-logs': 'View system events and logs',
   mcp: 'Configure MCP (Model Context Protocol) servers',
 };
@@ -107,6 +122,7 @@ export const TAB_GROUPS: Record<TabType, SettingsGroup> = {
   netlify: 'platform',
   vercel: 'platform',
   supabase: 'platform',
+  linear: 'platform',
   mcp: 'platform',
   data: 'data',
   'event-logs': 'data',
@@ -131,10 +147,11 @@ export const DEFAULT_TAB_CONFIG = [
   { id: 'netlify', visible: true, window: 'user' as const, order: 7 },
   { id: 'vercel', visible: true, window: 'user' as const, order: 8 },
   { id: 'supabase', visible: true, window: 'user' as const, order: 9 },
-  { id: 'mcp', visible: true, window: 'user' as const, order: 10 },
-  { id: 'data', visible: true, window: 'user' as const, order: 11 },
-  { id: 'event-logs', visible: true, window: 'user' as const, order: 12 },
-  { id: 'features', visible: true, window: 'user' as const, order: 13 },
+  { id: 'linear', visible: true, window: 'user' as const, order: 10 },
+  { id: 'mcp', visible: true, window: 'user' as const, order: 11 },
+  { id: 'data', visible: true, window: 'user' as const, order: 12 },
+  { id: 'event-logs', visible: true, window: 'user' as const, order: 13 },
+  { id: 'features', visible: true, window: 'user' as const, order: 14 },
 
   // User Window Tabs (In dropdown, initially hidden)
 ];

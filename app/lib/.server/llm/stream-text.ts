@@ -22,6 +22,9 @@ export interface StreamingOptions extends Omit<Parameters<typeof _streamText>[0]
       supabaseUrl?: string;
     };
   };
+  linearConnection?: {
+    isConnected: boolean;
+  };
 }
 
 const logger = createScopedLogger('stream-text');
@@ -159,6 +162,9 @@ export async function streamText(props: {
         isConnected: options?.supabaseConnection?.isConnected || false,
         hasSelectedProject: options?.supabaseConnection?.hasSelectedProject || false,
         credentials: options?.supabaseConnection?.credentials || undefined,
+      },
+      linear: {
+        isConnected: options?.linearConnection?.isConnected || false,
       },
     }) ?? getSystemPrompt();
 
