@@ -29,28 +29,6 @@ mac:
   entitlementsInherit: "assets/entitlements.mac.plist"
   gatekeeperAssess: false
 
-win:
-  icon: assets/icons/icon.ico
-  target:
-    - nsis
-  artifactName: ${name}-${version}-${os}-${arch}.${ext}
-
-linux:
-  icon: assets/icons/icon.png
-  target:
-    - AppImage
-    - deb
-  artifactName: ${name}-${version}-${os}-${arch}.${ext}
-  category: Development
-
-nsis:
-  oneClick: false
-  allowToChangeInstallationDirectory: true
-  createDesktopShortcut: true
-  createStartMenuShortcut: true
-  shortcutName: ${productName}
-  artifactName: ${name}-${version}-${os}-${arch}-setup.${ext}
-
 npmRebuild: false
 
 publish:
