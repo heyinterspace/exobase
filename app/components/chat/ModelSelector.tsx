@@ -749,7 +749,7 @@ export const ModelSelector = ({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toast.info('Smart routing is coming soon — pick a model directly for now.');
+                  toast.info('Smart routing is coming soon. Pick a model directly for now.');
                 }}
                 className={classNames(
                   'flex items-center justify-between gap-2 px-2.5 py-2 text-left',
@@ -784,7 +784,7 @@ export const ModelSelector = ({
                   }}
                   className="w-full text-left text-xs text-bolt-elements-textTertiary hover:text-accent transition-theme px-1"
                 >
-                  +{allModelsForProvider.length - filteredModels.length} more on {provider?.name} — search by name
+                  +{allModelsForProvider.length - filteredModels.length} more on {provider?.name}. Search by name
                 </button>
               )}
 
@@ -855,7 +855,7 @@ export const ModelSelector = ({
                     {debouncedModelSearchQuery
                       ? `No models match "${debouncedModelSearchQuery}"`
                       : provider?.name && LOCAL_PROVIDERS.includes(provider.name)
-                        ? `No models found — is ${provider.name} running?`
+                        ? `No models found. Is ${provider.name} running?`
                         : 'No models available'}
                   </div>
                   {!debouncedModelSearchQuery && provider?.name && LOCAL_PROVIDERS.includes(provider.name) && (
@@ -937,7 +937,7 @@ export const ModelSelector = ({
                         <div className="flex items-center gap-2 mt-0.5">
                           <span
                             className="text-xs text-bolt-elements-textTertiary"
-                            title="Context window — how much conversation and file content the model can consider at once"
+                            title="Context window: how much conversation and file content the model can consider at once"
                           >
                             {formatContextSize(modelOption.maxTokenAllowed)} context
                           </span>
