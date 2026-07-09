@@ -7,6 +7,7 @@ import { HeaderActionButtons } from './HeaderActionButtons.client';
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
 import { SettingsButton } from '~/components/ui/SettingsButton';
+import Logo from '~/components/ui/Logo';
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -19,12 +20,9 @@ export function Header() {
         'border-bolt-elements-borderColor': chat.started,
       })}
     >
-      <div className="flex items-center gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
-        <div className="i-ph:sidebar-simple-duotone text-xl" />
-        <a href="/" className="text-2xl font-semibold text-accent flex items-center">
-          Exobase
-        </a>
-      </div>
+      <a href="/" className="flex items-center z-logo cursor-pointer">
+        <Logo />
+      </a>
       {chat.started && ( // Display ChatDescription only when the chat has started.
         <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
           <ClientOnly>{() => <ChatDescription />}</ClientOnly>
