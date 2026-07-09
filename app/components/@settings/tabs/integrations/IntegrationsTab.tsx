@@ -1,6 +1,7 @@
 import { classNames } from '~/utils/classNames';
 import GitHubTab from '~/components/@settings/tabs/github/GitHubTab';
 import LinearTab from '~/components/@settings/tabs/linear/LinearTab';
+import CoolifyTab from '~/components/@settings/tabs/coolify/CoolifyTab';
 
 /*
  * Only providers with a real one-click connect flow live here — no menu
@@ -31,6 +32,12 @@ export default function IntegrationsTab() {
 
       <Category label="Issue tracking">
         <LinearTab />
+      </Category>
+
+      <div className="border-t border-bolt-elements-borderColor" />
+
+      <Category label="Hosting">
+        <CoolifyTab />
       </Category>
     </div>
   );
