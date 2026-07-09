@@ -7,6 +7,7 @@ import { Input } from '~/components/ui/Input';
 import { Card, CardHeader, CardTitle, CardDescription } from '~/components/ui/Card';
 import Starfield from '~/components/ui/Starfield';
 import PlanetSilhouette from '~/components/ui/PlanetSilhouette';
+import Logo from '~/components/ui/Logo';
 
 export const meta: MetaFunction = () => {
   return [
@@ -150,7 +151,7 @@ export default function Waitlist() {
         <PlanetSilhouette />
 
         <header className="relative z-10 flex items-center px-4 sm:px-6 h-[var(--header-height)]">
-          <span className="text-2xl font-semibold text-accent">Exobase</span>
+          <Logo />
         </header>
 
         <main className="relative z-10 flex-1 flex flex-col items-center px-4 pt-[12vh] pb-16 text-center">
