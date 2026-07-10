@@ -1,0 +1,276 @@
+/* =============================================================================
+   typeset.css - Interspace typography system
+   -----------------------------------------------------------------------------
+   One drop-in stylesheet for rendered HTML and markdown, modeled on
+   shadcn/typeset. Put class="typeset" on any container and everything inside
+   (headings, paragraphs, lists, tables, code, blockquotes) is styled from one
+   place, so you stop hand-coding type per component.
+
+   Three knobs, set per context (see the variants at the bottom):
+     --typeset-size     base font size for the block
+     --typeset-leading  line-height
+     --typeset-flow     vertical rhythm (space between blocks)
+
+   Portable by design:
+   - Colors default to currentColor and derive muted / border / code tones with
+     color-mix, so the block reads correctly on any background (light or dark)
+     without knowing the host's token format. Override the --typeset-* color
+     vars per project for exact brand tones.
+   - Fonts read from --typeset-font-*; map them to each project's faces.
+     Interspace brand default: Inter (body) + Space Grotesk (headings).
+   - Rhythm uses "> * + *", so streaming new blocks in never restyles earlier
+     ones.
+   ============================================================================ */
+
+.typeset {
+  /* Knobs ------------------------------------------------------------------- */
+  --typeset-size: 1rem;
+  --typeset-leading: 1.7;
+  --typeset-flow: 1.25em;
+
+  /* Fonts: override per project. Defaults cover a clean system stack. */
+  --typeset-font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --typeset-font-heading: var(--typeset-font-body);
+  --typeset-font-mono: ui-monospace, SFMono-Regular, "Space Mono", Menlo, Monaco, Consolas, monospace;
+
+  /* Colors: derived from the inherited text color by default. Override any of
+     these per project for exact brand tones. */
+  --typeset-fg: currentColor;
+  --typeset-heading-fg: var(--typeset-fg);
+  --typeset-muted-fg: color-mix(in srgb, currentColor 62%, transparent);
+  --typeset-border: color-mix(in srgb, currentColor 18%, transparent);
+  --typeset-accent: currentColor;
+  --typeset-code-bg: color-mix(in srgb, currentColor 8%, transparent);
+  --typeset-radius: 0.375rem;
+
+  container-type: inline-size;
+  font-family: var(--typeset-font-body);
+  font-size: var(--typeset-size);
+  line-height: var(--typeset-leading);
+  color: var(--typeset-fg);
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Rhythm: reset margins, then space every block after the first. Streaming-safe
+   because it never depends on :first-child / :last-child position. */
+.typeset > * {
+  margin: 0;
+}
+.typeset > * + * {
+  margin-top: var(--typeset-flow);
+}
+
+/* Headings ------------------------------------------------------------------ */
+.typeset :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--typeset-font-heading);
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--typeset-heading-fg);
+  letter-spacing: -0.014em;
+  text-wrap: balance;
+}
+/* Tighten the gap after a heading, and open it up before one. */
+.typeset > :is(h1, h2, h3, h4, h5, h6) + * {
+  margin-top: calc(var(--typeset-flow) * 0.5);
+}
+.typeset > * + :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: calc(var(--typeset-flow) * 1.6);
+}
+.typeset h1 {
+  font-size: 2.25em;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.typeset h2 {
+  font-size: 1.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--typeset-border);
+}
+.typeset h3 {
+  font-size: 1.3em;
+}
+.typeset h4 {
+  font-size: 1.1em;
+}
+.typeset h5 {
+  font-size: 1em;
+}
+.typeset h6 {
+  font-size: 0.9em;
+  color: var(--typeset-muted-fg);
+}
+
+/* Links --------------------------------------------------------------------- */
+.typeset a {
+  color: var(--typeset-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.typeset a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Inline emphasis ----------------------------------------------------------- */
+.typeset strong {
+  font-weight: 680;
+  color: var(--typeset-heading-fg);
+}
+.typeset em {
+  font-style: italic;
+}
+.typeset mark {
+  background: color-mix(in srgb, var(--typeset-accent) 22%, transparent);
+  color: inherit;
+  padding: 0.05em 0.2em;
+  border-radius: calc(var(--typeset-radius) * 0.5);
+}
+.typeset small {
+  font-size: 0.85em;
+  color: var(--typeset-muted-fg);
+}
+
+/* Lists --------------------------------------------------------------------- */
+.typeset :is(ul, ol) {
+  padding-left: 1.6em;
+}
+.typeset ul {
+  list-style: disc;
+}
+.typeset ol {
+  list-style: decimal;
+}
+.typeset li::marker {
+  color: var(--typeset-muted-fg);
+}
+.typeset li + li {
+  margin-top: calc(var(--typeset-flow) * 0.4);
+}
+.typeset li > :is(ul, ol) {
+  margin-top: calc(var(--typeset-flow) * 0.4);
+}
+.typeset li > * + * {
+  margin-top: calc(var(--typeset-flow) * 0.4);
+}
+
+/* Blockquote ---------------------------------------------------------------- */
+.typeset blockquote {
+  padding-left: 1em;
+  border-left: 3px solid var(--typeset-accent);
+  color: var(--typeset-muted-fg);
+  font-style: italic;
+}
+.typeset blockquote > * + * {
+  margin-top: calc(var(--typeset-flow) * 0.5);
+}
+
+/* Code ---------------------------------------------------------------------- */
+.typeset :not(pre) > code {
+  font-family: var(--typeset-font-mono);
+  font-size: 0.875em;
+  background: var(--typeset-code-bg);
+  padding: 0.15em 0.35em;
+  border-radius: calc(var(--typeset-radius) * 0.66);
+  white-space: break-spaces;
+}
+.typeset pre {
+  font-family: var(--typeset-font-mono);
+  font-size: 0.875em;
+  line-height: 1.5;
+  padding: 1em 1.15em;
+  border-radius: var(--typeset-radius);
+  background: var(--typeset-code-bg);
+  overflow-x: auto;
+}
+.typeset pre code {
+  font: inherit;
+  background: none;
+  padding: 0;
+  white-space: pre;
+}
+
+/* Tables -------------------------------------------------------------------- */
+.typeset table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+  display: block;
+  overflow-x: auto;
+}
+.typeset :is(th, td) {
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--typeset-border);
+  text-align: left;
+}
+.typeset th {
+  font-family: var(--typeset-font-heading);
+  font-weight: 620;
+  color: var(--typeset-heading-fg);
+}
+.typeset tbody tr:nth-child(2n) {
+  background: var(--typeset-code-bg);
+}
+
+/* Rules and media ----------------------------------------------------------- */
+.typeset hr {
+  border: 0;
+  border-top: 1px solid var(--typeset-border);
+  margin-top: calc(var(--typeset-flow) * 1.5);
+  margin-bottom: calc(var(--typeset-flow) * 1.5);
+}
+.typeset :is(img, video) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--typeset-radius);
+}
+.typeset kbd {
+  font-family: var(--typeset-font-mono);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--typeset-border);
+  border-radius: calc(var(--typeset-radius) * 0.66);
+}
+
+/* Wider containers get slightly roomier body type. */
+@container (min-width: 48rem) {
+  .typeset {
+    --typeset-size: 1.0625rem;
+  }
+}
+
+/* Context variants ---------------------------------------------------------- */
+/* Chat: tight rhythm for streaming assistant messages. */
+.typeset-chat {
+  --typeset-leading: 1.6;
+  --typeset-flow: 1em;
+}
+/* Docs: comfortable reading for reference content. */
+.typeset-docs {
+  --typeset-size: 1rem;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.5em;
+}
+/* Newsletter / long-form editorial. */
+.typeset-newsletter {
+  --typeset-size: 1.125rem;
+  --typeset-leading: 1.8;
+  --typeset-flow: 1.5em;
+}
+
+/* -----------------------------------------------------------------------------
+   exobase theme mapping (Structured Liquidity, dark only)
+   Points the shared system at exobase's own faces and shadcn / Tailwind tokens.
+   The system above owns the element styling; this only maps the variables.
+   -------------------------------------------------------------------------- */
+.typeset {
+  --typeset-font-heading: var(--display, "Archivo", system-ui, sans-serif);
+  --typeset-font-body: var(--body, "Outfit", system-ui, sans-serif);
+  --typeset-font-mono: var(--mono, "Space Mono", ui-monospace, monospace);
+  --typeset-accent: var(--primary, #a388ee);
+  --typeset-border: var(--border, #3c3f4b);
+  --typeset-code-bg: var(--secondary, #262626);
+  --typeset-radius: var(--radius, 0px);
+}
