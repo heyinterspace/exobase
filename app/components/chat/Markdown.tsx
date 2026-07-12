@@ -196,7 +196,7 @@ export const Markdown = memo(
     return (
       <ReactMarkdown
         allowedElements={allowedHTMLElements}
-        className={styles.MarkdownContent}
+        className={`${styles.MarkdownContent} typeset typeset-chat`}
         components={components}
         remarkPlugins={remarkPlugins(limitedMarkdown)}
         rehypePlugins={rehypePlugins(html)}
