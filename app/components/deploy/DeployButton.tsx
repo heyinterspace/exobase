@@ -1,25 +1,28 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useStore } from '@nanostores/react';
-import { coolifyConnection } from '~/lib/stores/coolify';
+import { checkManagedHosting, coolifyConnection, managedHostingAvailable } from '~/lib/stores/coolify';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { streamingState } from '~/lib/stores/streaming';
 import { classNames } from '~/utils/classNames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCoolifyDeploy } from '~/components/deploy/CoolifyDeploy.client';
 import { useGitHubDeploy } from '~/components/deploy/GitHubDeploy.client';
 import { GitHubDeploymentDialog } from '~/components/deploy/GitHubDeploymentDialog';
 
 /*
- * One opinionated target per layer: Coolify hosts the app, GitHub holds the
- * repo. No provider menu beyond that — see project_opinionated_positioning.
+ * One opinionated target per layer: Exobase hosts the app (managed Coolify
+ * server-side, invisible to the user — they "just think Exobase"), GitHub
+ * holds the repo. BYO Coolify is the self-hoster escape hatch. See
+ * project_opinionated_positioning and project_managed_hosting.
  */
 export const DeployButton = () => {
   const coolifyConn = useStore(coolifyConnection);
+  const managedAvailable = useStore(managedHostingAvailable);
   const [activePreviewIndex] = useState(0);
   const previews = useStore(workbenchStore.previews);
   const activePreview = previews[activePreviewIndex];
   const [isDeploying, setIsDeploying] = useState(false);
-  const [deployingTo, setDeployingTo] = useState<'coolify' | 'github' | null>(null);
+  const [deployingTo, setDeployingTo] = useState<'exobase' | 'github' | null>(null);
   const isStreaming = useStore(streamingState);
   const { handleCoolifyDeploy } = useCoolifyDeploy();
   const { handleGitHubDeploy } = useGitHubDeploy();
@@ -27,11 +30,22 @@ export const DeployButton = () => {
   const [githubDeploymentFiles, setGithubDeploymentFiles] = useState<Record<string, string> | null>(null);
   const [githubProjectName, setGithubProjectName] = useState('');
 
-  const coolifyConnected = Boolean(coolifyConn.token && coolifyConn.serverUrl);
+  useEffect(() => {
+    checkManagedHosting();
+  }, []);
+
+  const byoConnected = Boolean(coolifyConn.token && coolifyConn.serverUrl);
+  const hostingReady = Boolean(managedAvailable) || byoConnected;
+
+  const hostingLabel = byoConnected
+    ? 'Deploy to your Coolify'
+    : hostingReady
+      ? 'Deploy on Exobase'
+      : 'Hosting not set up yet';
 
   const handleCoolifyDeployClick = async () => {
     setIsDeploying(true);
-    setDeployingTo('coolify');
+    setDeployingTo('exobase');
 
     try {
       await handleCoolifyDeploy();
@@ -89,14 +103,12 @@ export const DeployButton = () => {
             align="end"
           >
             <DropdownMenu.Item
-              className={itemClass(isDeploying || !activePreview || !coolifyConnected)}
-              disabled={isDeploying || !activePreview || !coolifyConnected}
+              className={itemClass(isDeploying || !activePreview || !hostingReady)}
+              disabled={isDeploying || !activePreview || !hostingReady}
               onClick={handleCoolifyDeployClick}
             >
-              <span className="i-ph:cloud-arrow-up w-5 h-5" />
-              <span className="mx-auto">
-                {coolifyConnected ? 'Deploy to Coolify' : 'No Coolify Instance Connected'}
-              </span>
+              <span className="i-ph:rocket-launch-fill w-5 h-5" />
+              <span className="mx-auto">{hostingLabel}</span>
             </DropdownMenu.Item>
 
             <DropdownMenu.Item

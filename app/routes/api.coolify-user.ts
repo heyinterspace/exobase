@@ -1,6 +1,14 @@
-import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { withSecurity } from '~/lib/security';
-import { normalizeCoolifyUrl } from '~/lib/api/coolify.server';
+import { getManagedHostingConfig, normalizeCoolifyUrl } from '~/lib/api/coolify.server';
+
+/**
+ * GET: does this deployment have Exobase-managed hosting configured?
+ * Only a boolean ever leaves the server — never the instance URL or token.
+ */
+export async function loader({ context }: LoaderFunctionArgs) {
+  return json({ managedHostingAvailable: getManagedHostingConfig(context) !== null });
+}
 
 /**
  * Validates a Coolify instance URL + API token pair by listing the token's

@@ -20,6 +20,16 @@ export function CoolifyConnection() {
   const [serverUrl, setServerUrl] = React.useState('');
   const [apiToken, setApiToken] = React.useState('');
 
+  // Deep-link to the token page as soon as the URL parses: generate, paste, done.
+  const tokenPageUrl = React.useMemo(() => {
+    try {
+      const url = new URL(serverUrl.trim());
+      return `${url.protocol}//${url.host}/security/api-tokens`;
+    } catch {
+      return null;
+    }
+  }, [serverUrl]);
+
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -65,8 +75,21 @@ export function CoolifyConnection() {
                 className={inputClass}
               />
               <div className="mt-2 text-sm text-bolt-elements-textSecondary">
-                Create one in your Coolify dashboard under Keys &amp; Tokens &gt; API tokens, with read, write, and
-                deploy permissions.
+                {tokenPageUrl ? (
+                  <a
+                    href={tokenPageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline inline-flex items-center gap-1"
+                  >
+                    Open your API tokens page
+                    <div className="i-ph:arrow-square-out w-4 h-4" />
+                  </a>
+                ) : (
+                  <span>Create one in your Coolify dashboard under Keys &amp; Tokens &gt; API tokens</span>
+                )}
+                <span className="mx-1.5">·</span>
+                <span>Needs read, write, and deploy permissions</span>
               </div>
             </div>
 
