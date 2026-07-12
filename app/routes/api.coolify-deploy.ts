@@ -1,8 +1,16 @@
 import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { withSecurity } from '~/lib/security';
-import { coolifyFetch, normalizeCoolifyUrl } from '~/lib/api/coolify.server';
+import {
+  coolifyFetch,
+  getManagedHostingConfig,
+  normalizeCoolifyUrl,
+  type ManagedHostingConfig,
+} from '~/lib/api/coolify.server';
+import { parseCookies } from '~/lib/api/cookies';
+import { ANON_ID_COOKIE } from '~/lib/anonId';
 
 interface DeployRequest {
+  mode?: 'managed' | 'byo';
   serverUrl?: string;
   token?: string;
   gitRepository?: string;
@@ -29,30 +37,71 @@ interface CoolifyEnvironment {
 
 interface CoolifyApplication {
   uuid: string;
+  name?: string;
   fqdn?: string | null;
+}
+
+/*
+ * Managed-hosting guardrails, pre-identity. The anon cookie is spoofable, so
+ * these are speed bumps against casual abuse, not a security boundary — real
+ * per-account quotas land with Phase 2's identity work. Defense in depth here
+ * is the per-IP rate limit on this route (security.ts) plus hard resource
+ * caps on every container Coolify creates for us.
+ */
+const MANAGED_MAX_APPS_PER_USER = 3;
+const MANAGED_LIMITS = { limits_memory: '512m', limits_cpus: '0.5' };
+
+function managedAppPrefix(anonId: string) {
+  return `exo-${anonId.replace(/-/g, '').slice(0, 8)}-`;
 }
 
 /**
  * Creates (first deploy) or redeploys (subsequent) a Coolify application
- * backed by the GitHub repo the client just pushed. Coolify can only build
- * from a git source, so the client is responsible for the push; this route
- * only drives Coolify's REST API. The instance URL and token are
- * user-supplied (self-hosted) and never stored server-side.
+ * backed by the GitHub repo the client just pushed. Two modes:
+ *
+ * - managed (default UX: "Deploy on Exobase"): targets the Exobase-operated
+ *   instance from server-only env vars; apps are namespaced per anonymous
+ *   user and capped. The token never exists client-side.
+ * - byo: the user's own instance, URL + token supplied from their browser
+ *   (stored client-side only; proxied through here to dodge CORS).
  */
-async function coolifyDeployAction({ request }: ActionFunctionArgs) {
+async function coolifyDeployAction({ request, context }: ActionFunctionArgs) {
   const body = (await request.json().catch(() => ({}))) as DeployRequest;
-  const { token, gitRepository, gitBranch = 'main', appName, appUuid } = body;
-
-  if (!body.serverUrl || !token) {
-    return json({ error: 'Connect Coolify in Settings first' }, { status: 401 });
-  }
+  const { gitRepository, gitBranch = 'main', appName, appUuid } = body;
+  const mode = body.mode === 'byo' ? 'byo' : 'managed';
 
   let baseUrl: string;
+  let token: string;
+  let namePrefix = '';
 
-  try {
-    baseUrl = normalizeCoolifyUrl(body.serverUrl);
-  } catch {
-    return json({ error: 'Invalid Coolify instance URL' }, { status: 400 });
+  if (mode === 'managed') {
+    const managed: ManagedHostingConfig | null = getManagedHostingConfig(context);
+
+    if (!managed) {
+      return json({ error: 'Managed hosting is not configured on this server' }, { status: 501 });
+    }
+
+    const anonId = parseCookies(request.headers.get('Cookie'))[ANON_ID_COOKIE];
+
+    if (!anonId) {
+      return json({ error: 'Missing user id cookie; reload and try again' }, { status: 400 });
+    }
+
+    baseUrl = managed.baseUrl;
+    token = managed.token;
+    namePrefix = managedAppPrefix(anonId);
+  } else {
+    if (!body.serverUrl || !body.token) {
+      return json({ error: 'Connect Coolify in Settings first' }, { status: 401 });
+    }
+
+    try {
+      baseUrl = normalizeCoolifyUrl(body.serverUrl);
+    } catch {
+      return json({ error: 'Invalid Coolify instance URL' }, { status: 400 });
+    }
+
+    token = body.token;
   }
 
   try {
@@ -60,6 +109,15 @@ async function coolifyDeployAction({ request }: ActionFunctionArgs) {
     let deploymentUuid: string | undefined;
 
     if (uuid) {
+      if (mode === 'managed') {
+        // Only allow redeploying apps in this anon user's namespace.
+        const app = await coolifyFetch<CoolifyApplication>(`/applications/${uuid}`, { baseUrl, token });
+
+        if (!app.name?.startsWith(namePrefix)) {
+          return json({ error: 'This app does not belong to you' }, { status: 403 });
+        }
+      }
+
       // Existing app: Coolify pulls the branch fresh, so a redeploy is one call.
       const result = await coolifyFetch<{ message: string; deployment_uuid?: string }>(`/applications/${uuid}/start`, {
         baseUrl,
@@ -69,6 +127,18 @@ async function coolifyDeployAction({ request }: ActionFunctionArgs) {
     } else {
       if (!gitRepository) {
         return json({ error: 'gitRepository is required for a first deploy' }, { status: 400 });
+      }
+
+      if (mode === 'managed') {
+        const existing = await coolifyFetch<CoolifyApplication[]>('/applications', { baseUrl, token });
+        const mine = existing.filter((app) => app.name?.startsWith(namePrefix));
+
+        if (mine.length >= MANAGED_MAX_APPS_PER_USER) {
+          return json(
+            { error: `Hosting is limited to ${MANAGED_MAX_APPS_PER_USER} apps per user right now` },
+            { status: 403 },
+          );
+        }
       }
 
       /*
@@ -118,8 +188,11 @@ async function coolifyDeployAction({ request }: ActionFunctionArgs) {
           git_branch: gitBranch,
           build_pack: 'nixpacks',
           ports_exposes: '3000',
-          name: appName || 'exobase-app',
+          name: `${namePrefix}${appName || 'app'}`.slice(0, 60),
           instant_deploy: true,
+
+          // Hard per-container caps on shared infrastructure; harmless on BYO.
+          ...(mode === 'managed' ? MANAGED_LIMITS : {}),
         },
       });
 
@@ -140,7 +213,7 @@ async function coolifyDeployAction({ request }: ActionFunctionArgs) {
   } catch (error) {
     console.error('Coolify deploy failed:', error);
 
-    return json({ error: error instanceof Error ? error.message : 'Coolify deployment failed' }, { status: 502 });
+    return json({ error: error instanceof Error ? error.message : 'Deployment failed' }, { status: 502 });
   }
 }
 

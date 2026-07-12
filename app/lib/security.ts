@@ -3,11 +3,13 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudfla
 // Rate limiting store (in-memory for serverless environments)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
-// Rate limit configuration
+/*
+ * Rate limit configuration. checkRateLimit() uses the FIRST matching rule,
+ * so specific endpoints must come before the '/api/*' catch-all — with the
+ * catch-all first (as it originally was), every specific rule below it was
+ * dead code.
+ */
 const RATE_LIMITS = {
-  // General API endpoints
-  '/api/*': { windowMs: 15 * 60 * 1000, maxRequests: 100 }, // 100 requests per 15 minutes
-
   // LLM API (more restrictive)
   '/api/llmcall': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 requests per minute
 
@@ -19,6 +21,12 @@ const RATE_LIMITS = {
 
   // Waitlist signup (public, unauthenticated — keep tight to deter spam)
   '/api/waitlist': { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 requests per 15 minutes
+
+  // Deploys trigger builds on Exobase-managed infrastructure — keep tight
+  '/api/coolify-deploy': { windowMs: 10 * 60 * 1000, maxRequests: 5 }, // 5 deploys per 10 minutes
+
+  // General API endpoints (catch-all, keep last)
+  '/api/*': { windowMs: 15 * 60 * 1000, maxRequests: 100 }, // 100 requests per 15 minutes
 };
 
 /**
@@ -28,10 +36,15 @@ export function checkRateLimit(request: Request, endpoint: string): { allowed: b
   const clientIP = getClientIP(request);
   const key = `${clientIP}:${endpoint}`;
 
-  // Find matching rate limit rule
+  /*
+   * Find the matching rule — first match wins, so RATE_LIMITS must list
+   * specific patterns before catch-alls. A trailing '*' is a prefix
+   * wildcard (covers both '/api/*' and '/api/github-*' style patterns;
+   * the latter never matched under the old '/*'-only check).
+   */
   const rule = Object.entries(RATE_LIMITS).find(([pattern]) => {
-    if (pattern.endsWith('/*')) {
-      const basePattern = pattern.slice(0, -2);
+    if (pattern.endsWith('*')) {
+      const basePattern = pattern.slice(0, -1);
       return endpoint.startsWith(basePattern);
     }
 

@@ -14,6 +14,33 @@ export function normalizeCoolifyUrl(raw: string): string {
   return `${url.protocol}//${url.host}`;
 }
 
+export interface ManagedHostingConfig {
+  baseUrl: string;
+  token: string;
+}
+
+/**
+ * Exobase-operated Coolify instance for the default "Deploy on Exobase"
+ * path — users never see or configure it (they "just think Exobase", the
+ * way Replit users think Replit). Server-only env vars, no VITE_ prefix:
+ * this token controls the shared hosting box and must never reach a client.
+ */
+export function getManagedHostingConfig(context: any): ManagedHostingConfig | null {
+  const url = context?.cloudflare?.env?.EXOBASE_COOLIFY_URL || process.env.EXOBASE_COOLIFY_URL;
+  const token = context?.cloudflare?.env?.EXOBASE_COOLIFY_TOKEN || process.env.EXOBASE_COOLIFY_TOKEN;
+
+  if (!url || !token) {
+    return null;
+  }
+
+  try {
+    return { baseUrl: normalizeCoolifyUrl(url), token };
+  } catch {
+    console.error('EXOBASE_COOLIFY_URL is set but not a valid URL');
+    return null;
+  }
+}
+
 export interface CoolifyRequestOptions {
   baseUrl: string;
   token: string;

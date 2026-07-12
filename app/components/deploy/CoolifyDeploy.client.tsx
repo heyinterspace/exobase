@@ -2,12 +2,13 @@ import { toast } from 'react-toastify';
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { coolifyConnection } from '~/lib/stores/coolify';
+import { checkManagedHosting, coolifyConnection } from '~/lib/stores/coolify';
 import { webcontainer } from '~/lib/webcontainer';
 import type { ActionCallbackData } from '~/lib/runtime/message-parser';
 import { chatId } from '~/lib/persistence/useChatHistory';
 import { getLocalStorage } from '~/lib/persistence/localStorage';
 import { pushFilesToGitHubRepo, sanitizeRepoName } from '~/lib/github/pushToGitHub';
+import { getOrCreateAnonUserId } from '~/lib/anonId';
 import { collectProjectFiles, formatBuildFailureOutput } from './deployUtils';
 
 interface StoredCoolifyApp {
@@ -17,10 +18,10 @@ interface StoredCoolifyApp {
 }
 
 /**
- * One-click deploy: push the project to GitHub (Coolify can only build from
- * a git source), then create or redeploy a Coolify application pointed at
- * that repo. GitHub is the repo layer, Coolify is the hosting layer — both
- * already connected in Settings, so the click itself asks nothing.
+ * One-click deploy: push the project to GitHub (the hosting layer can only
+ * build from a git source), then create or redeploy the app. Prefers
+ * Exobase-managed hosting when the server offers it (zero user setup, the
+ * Replit model); falls back to the user's own Coolify connection.
  */
 export function useCoolifyDeploy() {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -28,15 +29,29 @@ export function useCoolifyDeploy() {
   const connection = useStore(coolifyConnection);
 
   const handleCoolifyDeploy = async () => {
-    if (!connection.token || !connection.serverUrl) {
-      toast.error('Connect Coolify in Settings > Integrations first');
+    const managedAvailable = await checkManagedHosting();
+    const byoConnected = Boolean(connection.token && connection.serverUrl);
+
+    if (!managedAvailable && !byoConnected) {
+      toast.error('Hosting is not set up yet. Connect a Coolify instance in Settings > Integrations');
       return false;
+    }
+
+    /*
+     * BYO wins when both exist: someone who connected their own instance did
+     * so deliberately and expects their apps on their own hardware.
+     */
+    const mode = byoConnected ? 'byo' : 'managed';
+
+    if (mode === 'managed') {
+      // The server namespaces managed apps by this cookie; make sure it exists.
+      getOrCreateAnonUserId();
     }
 
     const githubConnection = getLocalStorage('github_connection');
 
     if (!githubConnection?.token || !githubConnection?.user) {
-      toast.error('Connect GitHub in Settings > Integrations first — Coolify deploys from a GitHub repo');
+      toast.error('Connect GitHub in Settings > Integrations first. Deploys build from your GitHub repo');
       return false;
     }
 
@@ -112,8 +127,8 @@ export function useCoolifyDeploy() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serverUrl: connection.serverUrl,
-          token: connection.token,
+          mode,
+          ...(mode === 'byo' ? { serverUrl: connection.serverUrl, token: connection.token } : {}),
           gitRepository: pushResult.cloneUrl,
           gitBranch: pushResult.defaultBranch,
           appName: repoName,
@@ -124,7 +139,7 @@ export function useCoolifyDeploy() {
       const data = (await response.json()) as { appUuid?: string; url?: string; error?: string };
 
       if (!response.ok || !data.appUuid) {
-        throw new Error(data.error || `Coolify deployment failed (${response.status})`);
+        throw new Error(data.error || `Deployment failed (${response.status})`);
       }
 
       localStorage.setItem(
@@ -137,7 +152,8 @@ export function useCoolifyDeploy() {
         url: data.url,
       });
 
-      toast.success(data.url ? `Deploying on Coolify: ${data.url}` : 'Deployment started on Coolify');
+      const where = mode === 'managed' ? 'Exobase' : 'Coolify';
+      toast.success(data.url ? `Deploying on ${where}: ${data.url}` : `Deployment started on ${where}`);
 
       return true;
     } catch (err) {

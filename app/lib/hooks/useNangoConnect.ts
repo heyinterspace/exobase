@@ -1,23 +1,5 @@
-import Cookies from 'js-cookie';
 import Nango from '@nangohq/frontend';
-
-/**
- * A stable anonymous id, not a login — only used so Nango can group a
- * browser's connections in its dashboard. Exobase has no server-side user
- * accounts, so there's nothing more meaningful to key it to.
- */
-function getOrCreateNangoEndUserId(): string {
-  const existing = Cookies.get('exobaseUserId');
-
-  if (existing) {
-    return existing;
-  }
-
-  const id = crypto.randomUUID();
-  Cookies.set('exobaseUserId', id, { expires: 3650 });
-
-  return id;
-}
+import { getOrCreateAnonUserId } from '~/lib/anonId';
 
 /**
  * Shared "Connect with X" OAuth popup flow via Nango, used by every
@@ -29,7 +11,7 @@ export async function connectViaNango(integrationId: string): Promise<string> {
   const sessionRes = await fetch('/api/nango-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ integrationId, endUserId: getOrCreateNangoEndUserId() }),
+    body: JSON.stringify({ integrationId, endUserId: getOrCreateAnonUserId() }),
   });
 
   if (!sessionRes.ok) {

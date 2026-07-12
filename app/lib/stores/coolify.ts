@@ -32,3 +32,32 @@ export const updateCoolifyConnection = (updates: Partial<CoolifyConnection>) => 
     localStorage.setItem('coolify_connection', JSON.stringify(newState));
   }
 };
+
+/*
+ * Whether this deployment offers Exobase-managed hosting (an Exobase-operated
+ * Coolify configured server-side). When it does, "Deploy" needs no user
+ * hosting setup at all; the BYO connection above becomes the escape hatch.
+ * null = not checked yet.
+ */
+export const managedHostingAvailable = atom<boolean | null>(null);
+
+let managedHostingCheck: Promise<boolean> | null = null;
+
+export function checkManagedHosting(): Promise<boolean> {
+  if (!managedHostingCheck) {
+    managedHostingCheck = fetch('/api/coolify-user')
+      .then((res) => (res.ok ? res.json() : { managedHostingAvailable: false }))
+      .then((data: any) => {
+        const available = Boolean(data.managedHostingAvailable);
+        managedHostingAvailable.set(available);
+
+        return available;
+      })
+      .catch(() => {
+        managedHostingAvailable.set(false);
+        return false;
+      });
+  }
+
+  return managedHostingCheck;
+}
